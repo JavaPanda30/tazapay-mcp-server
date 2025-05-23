@@ -48,3 +48,9 @@ const (
 	BalanceCurrencyField = "currency"
 	BalanceCurrencyDesc  = "Currency to fetch balance for. It should be in 3 letter currency code. Example : USD, INR"
 )
+
+// create beneficiary tool
+const (
+	CreateBeneficiaryToolName = "create_beneficiary_tool"
+	CreateBeneficiaryToolDesc = "Create a new beneficiary in Tazapay."
+)

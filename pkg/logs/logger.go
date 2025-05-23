@@ -66,7 +66,6 @@ func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
 	return logger, cleanup, nil
 }
 
-
 // fallbackLogger returns a stderr-based logger if file init fails.
 func fallbackLogger(cfg Config) *slog.Logger {
 	handler := getHandler(cfg, os.Stderr)

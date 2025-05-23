@@ -8,16 +8,18 @@ const (
 
 // API Path Segments
 const (
-	CheckoutPath = "/checkout"
-	FxPayoutPath = "/fx/payout"
-	BalancePath  = "/balance"
+	CheckoutPath    = "/checkout"
+	FxPayoutPath    = "/fx/payout"
+	BalancePath     = "/balance"
+	BeneficiaryPath = "/beneficiary"
 )
 
 // Production URLs
 const (
-	PaymentLinkBaseURLProd = ProdBaseURL + CheckoutPath
-	PaymentFxBaseURLProd   = ProdBaseURL + FxPayoutPath
-	BalanceBaseURLProd     = ProdBaseURL + BalancePath
+	PaymentLinkBaseURLProd  = ProdBaseURL + CheckoutPath
+	PaymentFxBaseURLProd    = ProdBaseURL + FxPayoutPath
+	BalanceBaseURLProd      = ProdBaseURL + BalancePath
+	CreateBeneficiaryAPIURL = ProdBaseURL + BeneficiaryPath
 )
 
 // HTTP Method Constants

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 )
@@ -22,4 +23,9 @@ func WrapFieldTypeError(logger *slog.Logger, field string) error {
 func WrapInvalidAmountError(currency string) error {
 	// Using fmt.Errorf for better formatting
 	return fmt.Errorf("invalid amount format for currency: %s", currency)
+}
+
+// Missing Fields Error
+func WrapMissingFieldsError(fields []string) error {
+	return fmt.Errorf("missing One of the required fields: %s", strings.Join(fields, ", "))
 }

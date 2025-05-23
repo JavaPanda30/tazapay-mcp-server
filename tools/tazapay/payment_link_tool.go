@@ -44,7 +44,7 @@ func (*PaymentLinkTool) Definition() mcp.Tool {
 func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.Params.Arguments
 
-	t.logger.Info("handling payment link tool request", slog.Any("args", args))
+	t.logger.InfoContext(ctx, "handling payment link tool request", slog.Any("args", args))
 
 	params, err := validateAndExtractArgs(t, args)
 	if err != nil {
@@ -53,7 +53,7 @@ func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 	}
 
 	payload := NewPaymentLinkRequest(&params)
-	t.logger.Info("constructed payment link payload", slog.Any("payload", payload))
+	t.logger.InfoContext(ctx, "constructed payment link payload", slog.Any("payload", payload))
 
 	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, constants.PaymentLinkBaseURLProd,
 		payload, constants.PostHTTPMethod)
@@ -74,7 +74,7 @@ func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		return nil, constants.ErrMissingPaymentLink
 	}
 
-	t.logger.Info("payment link successfully generated", slog.String("url", paymentLink))
+	t.logger.InfoContext(ctx, "payment link successfully generated", slog.String("url", paymentLink))
 
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{

@@ -28,7 +28,7 @@ func HandlePOSTHttpRequest(ctx context.Context, logger *slog.Logger, url string,
 		return nil, fmt.Errorf("error creating request body: %w", err)
 	}
 
-	logger.Info("Sending POST request", slog.Any("payload", payload))
+	logger.InfoContext(ctx, "Sending POST request", slog.Any("payload", payload))
 
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
@@ -70,7 +70,7 @@ func HandlePOSTHttpRequest(ctx context.Context, logger *slog.Logger, url string,
 		return nil, fmt.Errorf("error decoding response: %w", ok)
 	}
 
-	logger.Info("POST request successful")
+	logger.InfoContext(ctx, "POST request successful")
 
 	return result, nil
 }

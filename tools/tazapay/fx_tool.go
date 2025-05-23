@@ -39,7 +39,7 @@ func (*FXTool) Definition() mcp.Tool {
 
 // Handle processes the tool request and returns a result
 func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	t.logger.Info("Handling FXTool request", slog.Any("params", req.Params.Arguments))
+	t.logger.InfoContext(ctx, "Handling FXTool request", slog.Any("params", req.Params.Arguments))
 
 	args := req.Params.Arguments
 
@@ -54,7 +54,7 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 	url := fmt.Sprintf("%s?initial_currency=%s&final_currency=%s&amount=%d",
 		constants.PaymentFxBaseURLProd, params.From, params.To, int(params.Amount))
 
-	t.logger.Info("Calling FX API", slog.String("url", url))
+	t.logger.InfoContext(ctx, "Calling FX API", slog.String("url", url))
 
 	// call FX API
 	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, url, constants.GetHTTPMethod)
@@ -83,7 +83,7 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 	}
 
 	result := fmt.Sprintf("Rate: %.2f, Converted Amount: %.2f", exRate, converted)
-	t.logger.Info("FXTool result ready", slog.String("result", result))
+	t.logger.InfoContext(ctx, "FXTool result ready", slog.String("result", result))
 
 	// return result
 	return &mcp.CallToolResult{

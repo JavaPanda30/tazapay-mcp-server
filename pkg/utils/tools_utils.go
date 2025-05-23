@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -57,8 +58,6 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 	}
 	return output, nil
 }
-
-
 
 // MapToStruct converts map[string]any to any struct using JSON marshaling.
 // Pass a pointer to the output struct as `out`.

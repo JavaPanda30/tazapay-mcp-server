@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/mark3labs/mcp-go/mcp"
+
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
 )
@@ -17,6 +18,7 @@ type BalanceTool struct {
 
 // NewBalanceTool creates a new balance tool
 func NewBalanceTool(logger *slog.Logger) *BalanceTool {
+	logger.InfoContext(context.Background(), "Initializing BalanceTool")
 	return &BalanceTool{
 		logger: logger,
 	}

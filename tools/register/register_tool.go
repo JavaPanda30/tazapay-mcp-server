@@ -19,6 +19,8 @@ func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
 		tazapay.NewFXTool(logger),
 		tazapay.NewPaymentLinkTool(logger),
 		tazapay.NewBalanceTool(logger),
+		tazapay.NewCreateBeneficiaryTool(logger),
+		tazapay.NewCreatePayoutTool(logger),
 	}
 
 	for _, tool := range tools {
