@@ -39,7 +39,7 @@ func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
 	// Ensure the log directory exists.
 	logDir := filepath.Dir(logPath)
 	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		return nil, nil, fmt.Errorf("failed to create log directory: %v", err)
+		return nil, nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
 
 	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, constants.OpenFileMode)

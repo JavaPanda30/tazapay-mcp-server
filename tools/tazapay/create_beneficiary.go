@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/mark3labs/mcp-go/mcp"
+
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
 	"github.com/tazapay/tazapay-mcp-server/types"
@@ -24,12 +25,13 @@ func NewCreateBeneficiaryTool(logger *slog.Logger) *CreateBeneficiaryTool {
 // Definition : registers this tool with the MCP
 func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 	t.logger.Info("Registering CreateBeneficiaryTool with MCP")
+
 	return mcp.NewTool(
 		"create_beneficiary_tool",
 		mcp.WithDescription("Create a beneficiary on Tazapay"),
 		mcp.WithString("name", mcp.Required()),
 		mcp.WithString("email"),
-		mcp.WithString("type", mcp.Required(),mcp.Enum("individual", "business")),
+		mcp.WithString("type", mcp.Required(), mcp.Enum("individual", "business")),
 		mcp.WithString("national_identification_number"),
 		mcp.WithString("tax_id"),
 
@@ -121,8 +123,9 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 
 // Handle processes tool requests
 func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args := req.Params.Arguments
+	args, _ := req.Params.Arguments.(map[string]any)
 	t.logger.InfoContext(ctx, "Handling CreateBeneficiaryTool request", "args", args)
+
 	defer func() {
 		if r := recover(); r != nil {
 			t.logger.Error("Panic recovered in Handle", "panic", r)
@@ -140,6 +143,7 @@ func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 	if payload.Name == "" || payload.Type == "" || payload.DestinationDetails.Type == "" {
 		err := utils.WrapMissingFieldsError([]string{"name", "type", "account_id", "destination_details.type"})
 		t.logger.ErrorContext(ctx, err.Error())
+
 		return nil, err
 	}
 
@@ -176,5 +180,6 @@ func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled CreateBeneficiaryTool request", "result", result)
+
 	return result, nil
 }

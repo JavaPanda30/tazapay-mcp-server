@@ -41,7 +41,7 @@ func (*FXTool) Definition() mcp.Tool {
 func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	t.logger.InfoContext(ctx, "Handling FXTool request", slog.Any("params", req.Params.Arguments))
 
-	args := req.Params.Arguments
+	args := req.Params.Arguments.(map[string]any)
 
 	// validate and extract arguments
 	params, err := validateAndExtractFXArgs(t, args)

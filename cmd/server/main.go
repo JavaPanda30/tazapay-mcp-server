@@ -80,12 +80,12 @@ func main() {
 
 	logger.Info("Started Tazapay MCP Server.")
 
-	server := server.NewSSEServer(s)
+	// server := server.New(s)
 
-	// Gracefully shutdown at completion of execution	
-	defer server.Shutdown(context.Background())
+	// Gracefully shutdown at completion of execution
+	// defer server.Shutdown(context.Background())
 
-	if err := server.Start(":8080"); err != nil {
+	if err := server.ServeStdio(s); err != nil {
 		logger.Error("server exited with error", "error", err)
 		os.Exit(1)
 	}

@@ -12,5 +12,5 @@ var (
 		"TAZAPAY_API_KEY or TAZAPAY_API_SECRET not set. Use -e option or provide a " +
 			"`.tazapay-mcp-server.yaml` config file in your home directory",
 	)
-	ErrNoBeneficiaryId    = errors.New("no beneficiary id in response")
+	ErrNoBeneficiaryId = errors.New("no beneficiary id in response")
 )

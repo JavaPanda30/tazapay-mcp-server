@@ -42,7 +42,7 @@ func (*PaymentLinkTool) Definition() mcp.Tool {
 
 // Handle processes the tool request and returns a result
 func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args := req.Params.Arguments
+	args := req.Params.Arguments.(map[string]any)
 
 	t.logger.InfoContext(ctx, "handling payment link tool request", slog.Any("args", args))
 

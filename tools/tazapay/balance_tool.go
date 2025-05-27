@@ -19,6 +19,7 @@ type BalanceTool struct {
 // NewBalanceTool creates a new balance tool
 func NewBalanceTool(logger *slog.Logger) *BalanceTool {
 	logger.InfoContext(context.Background(), "Initializing BalanceTool")
+
 	return &BalanceTool{
 		logger: logger,
 	}
@@ -35,10 +36,11 @@ func (t *BalanceTool) Definition() mcp.Tool {
 
 // Handle processes tool requests
 func (t *BalanceTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args := req.Params.Arguments
+	args := req.Params.Arguments.(map[string]any)
 	currency, _ := args["currency"].(string)
 
 	path := constants.BalancePath
+
 	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, constants.BalanceBaseURLProd+path, constants.GetHTTPMethod)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get balance: %w", err)

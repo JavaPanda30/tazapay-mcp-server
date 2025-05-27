@@ -2,24 +2,24 @@ package types
 
 // DestinationRequest represents the payload for registering a destination
 type DestinationRequest struct {
+	DestinationDetails           DestinationDetails `json:"destination_details"`
+	Phone                        *Phone             `json:"phone,omitempty"`
+	Address                      *Address           `json:"address,omitempty"`
+	Documents                    *Documents         `json:"documents,omitempty"`
 	Name                         string             `json:"name"`
 	Email                        string             `json:"email,omitempty"`
 	Type                         string             `json:"type"`
 	AccountID                    string             `json:"account_id"`
 	NationalIdentificationNumber string             `json:"national_identification_number,omitempty"`
 	TaxID                        string             `json:"tax_id,omitempty"`
-	DestinationDetails           DestinationDetails `json:"destination_details"`
-	Phone                        *Phone             `json:"phone,omitempty"`
-	Address                      *Address           `json:"address,omitempty"`
-	Documents                    *Documents         `json:"documents,omitempty"`
 }
 
 // DestinationDetails represents the details of a destination
 type DestinationDetails struct {
-	Type                string               `json:"type"`
 	Bank                *Bank                `json:"bank,omitempty"`
 	Wallet              *Wallet              `json:"wallet,omitempty"`
 	LocalPaymentNetwork *LocalPaymentNetwork `json:"local_payment_network,omitempty"`
+	Type                string               `json:"type"`
 }
 
 // Bank represents bank details
@@ -32,8 +32,8 @@ type Bank struct {
 	Country       string    `json:"country,omitempty"`
 	Currency      string    `json:"currency,omitempty"`
 	PurposeCode   string    `json:"purpose_code,omitempty"`
-	FIRCRequired  bool      `json:"firc_required,omitempty"`
 	AccountType   string    `json:"account_type,omitempty"`
+	FIRCRequired  bool      `json:"firc_required,omitempty"`
 }
 
 // BankCodes holds various bank identification codes

@@ -21,6 +21,7 @@ func NewCreatePayoutTool(logger *slog.Logger) *CreatePayoutTool {
 // Definition registers this tool with the MCP
 func (t *CreatePayoutTool) Definition() mcp.Tool {
 	t.logger.Info("Registering CreatePayoutTool with MCP")
+
 	return mcp.NewTool(
 		"create_payout_tool",
 		mcp.WithDescription("Create a payout on Tazapay"),
@@ -142,6 +143,7 @@ func (t *CreatePayoutTool) Definition() mcp.Tool {
 // Handle processes tool requests
 func (t *CreatePayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	t.logger.InfoContext(ctx, "Handling CreatePayoutTool request", "request", req)
+
 	defer func() {
 		if r := recover(); r != nil {
 			t.logger.Error("Panic recovered in Handle", "panic", r)
@@ -154,5 +156,6 @@ func (t *CreatePayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) 
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled CreatePayoutTool request", "result", result)
+
 	return result, nil
 }

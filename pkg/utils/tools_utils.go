@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/tazapay/tazapay-mcp-server/types"
@@ -35,27 +34,25 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 		currencyCode := strings.ToUpper(currency)
 		for _, balance := range result.Data.Available {
 			if strings.EqualFold(balance.Currency, currencyCode) {
-				amountInt, err := strconv.Atoi(balance.Amount)
-				if err != nil {
-					return "", fmt.Errorf("invalid amount format for %s: %w", balance.Currency, err)
-				}
+				amountInt := balance.Amount
 				amountFloat := float64(amountInt) / 100.0
+
 				return fmt.Sprintf("%s balance: %.2f", balance.Currency, amountFloat), nil
 			}
 		}
-		return fmt.Sprintf("No balance found for currency: %s", currencyCode), nil
+
+		return "No balance found for currency: " + currencyCode, nil
 	}
 
 	// Format all balances
 	output := "Available account balances:\n"
+
 	for _, balance := range result.Data.Available {
-		amountInt, err := strconv.Atoi(balance.Amount)
-		if err != nil {
-			return "", fmt.Errorf("invalid amount format for %s: %w", balance.Currency, err)
-		}
+		amountInt := balance.Amount
 		amountFloat := float64(amountInt) / 100.0
 		output += fmt.Sprintf("- %s: %.2f\n", balance.Currency, amountFloat)
 	}
+
 	return output, nil
 }
 
