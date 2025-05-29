@@ -12,6 +12,10 @@ import (
 )
 
 // RegisterTools registers all tools with the server
+
+// NOTE: All tool constructors (e.g., NewFXTool, NewCreatePayinTool, etc.) must be lightweight.
+// They should NOT perform any blocking or heavy operations (network calls, file I/O, etc.).
+// Only assign struct fields and log. Any heavy setup should be deferred to the handler or background goroutines.
 func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
 	logger.Info("Registering tools with MCP server")
 
@@ -21,6 +25,18 @@ func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
 		tazapay.NewBalanceTool(logger),
 		tazapay.NewCreateBeneficiaryTool(logger),
 		tazapay.NewCreatePayoutTool(logger),
+		tazapay.NewCreatePayinTool(logger),
+		tazapay.NewConfirmPayinTool(logger),
+		tazapay.NewUpdatePayinTool(logger),
+		tazapay.NewCancelPayinTool(logger),
+		tazapay.NewGetPayinTool(logger),
+		tazapay.NewFetchCheckoutTool(logger),
+		tazapay.NewExpireCheckoutTool(logger),
+		tazapay.NewGetPayoutTool(logger),
+		tazapay.NewFundPayoutTool(logger),
+		tazapay.NewGetPaymentAttemptTool(logger),
+		tazapay.NewGetBeneficiaryTool(logger),
+		tazapay.NewUpdateBeneficiaryTool(logger),
 	}
 
 	for _, tool := range tools {

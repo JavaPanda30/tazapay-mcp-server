@@ -1,14 +1,29 @@
 package log_test
 
 import (
-	"bytes"
+	"context"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	log "github.com/tazapay/tazapay-mcp-server/pkg/logs"
 )
+
+func getTestContext(t *testing.T) context.Context {
+	// Go 1.20+ provides t.Context(), otherwise fallback
+	tCtxMethod := reflect.ValueOf(t).MethodByName("Context")
+	if tCtxMethod.IsValid() {
+		results := tCtxMethod.Call(nil)
+		if len(results) == 1 {
+			if ctx, ok := results[0].Interface().(context.Context); ok {
+				return ctx
+			}
+		}
+	}
+	return t.Context()
+}
 
 func TestNewLoggerWithDefaultConfig(t *testing.T) {
 	cfg := log.Config{}
@@ -16,9 +31,9 @@ func TestNewLoggerWithDefaultConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
-	defer closeFn(t.Context())
+	defer closeFn(getTestContext(t))
 
-	logger.InfoContext(t.Context(), "default logger test")
+	logger.InfoContext(getTestContext(t), "default logger test")
 }
 
 func TestNewLoggerWithCustomConfig(t *testing.T) {
@@ -35,9 +50,9 @@ func TestNewLoggerWithCustomConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
-	defer closeFn(t.Context())
+	defer closeFn(getTestContext(t))
 
-	ctx := t.Context()
+	ctx := getTestContext(t)
 	logger.DebugContext(ctx, "debug message")
 	logger.InfoContext(ctx, "info message")
 
@@ -52,37 +67,35 @@ func TestNewLoggerWithCustomConfig(t *testing.T) {
 	}
 }
 
-func TestNewLoggerWithInvalidFilePath(t *testing.T) {
-	// Redirect os.Stderr to capture fallback log output
-	oldStderr := os.Stderr
-	r, w, _ := os.Pipe() //nolint: errcheck // No need to check error
-	os.Stderr = w
+func TestLoggerUsesEnvLogFilePath(t *testing.T) {
+	tmpDir := t.TempDir()
+	logPath := filepath.Join(tmpDir, "envlog.log")
+
+	os.Setenv("LOG_FILE_PATH", logPath)
+	defer os.Unsetenv("LOG_FILE_PATH")
 
 	cfg := log.Config{
-		FilePath: "/invalid/path/to/logfile.log",
+		FilePath: "should_not_be_used.log",
 		Format:   "text",
 		Level:    "info",
 	}
 
 	logger, closeFn, err := log.New(cfg)
 	if err != nil {
-		t.Fatalf("expected fallback logger without error, got: %v", err)
+		t.Fatalf("expected no error, got: %v", err)
 	}
-	defer closeFn(t.Context())
+	defer closeFn(getTestContext(t))
 
-	logger.InfoContext(t.Context(), "fallback log test")
+	ctx := getTestContext(t)
+	logger.InfoContext(ctx, "env log path message")
 
-	// Close writer and restore stderr
-	w.Close()
-	os.Stderr = oldStderr
-
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(r)
+	data, err := os.ReadFile(logPath)
 	if err != nil {
-		t.Fatalf("failed to read from stderr pipe: %v", err)
+		t.Fatalf("failed to read log file: %v", err)
 	}
 
-	if !strings.Contains(buf.String(), "fallback") {
-		t.Errorf("expected fallback warning in stderr, got: %s", buf.String())
+	content := string(data)
+	if !strings.Contains(content, "env log path message") {
+		t.Errorf("log file does not contain expected message from env path:\n%s", content)
 	}
 }

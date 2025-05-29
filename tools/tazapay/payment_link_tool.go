@@ -31,11 +31,11 @@ func (*PaymentLinkTool) Definition() mcp.Tool {
 	return mcp.NewTool(
 		constants.PaymentLinkToolName,
 		mcp.WithDescription(constants.PaymentLinkToolDesc),
-		mcp.WithString(constants.InvoiceCurrencyField, mcp.Required(), mcp.Description(constants.InvoiceCurrencyDesc)),
+		mcp.WithString(constants.InvoiceCurrencyField, mcp.Required(), mcp.Description("Currency in which the invoice is to be raised (in uppercase, ISO-4217 standard, e.g., USD, EUR)")),
 		mcp.WithNumber(constants.PaymentAmountField, mcp.Required(), mcp.Description(constants.PaymentAmountDesc)),
 		mcp.WithString(constants.CustomerNameField, mcp.Required(), mcp.Description(constants.CustomerNameDesc)),
 		mcp.WithString(constants.CustomerEmailField, mcp.Required(), mcp.Description(constants.CustomerEmailDesc)),
-		mcp.WithString(constants.CustomerCountryField, mcp.Required(), mcp.Description(constants.CustomerCountryDesc)),
+		mcp.WithString(constants.CustomerCountryField, mcp.Required(), mcp.Description("Country of the customer (ISO 3166 standard alpha-2 code. eg: SG, IN, US, etc.)")),
 		mcp.WithString(constants.TransactionDescField, mcp.Required(), mcp.Description(constants.TransactionDesc)),
 	)
 }
@@ -113,6 +113,13 @@ func validateAndExtractArgs(t *PaymentLinkTool, args map[string]any) (types.Paym
 
 	if p.CustomerCountry, ok = args[constants.CustomerCountryField].(string); !ok {
 		return p, utils.WrapFieldTypeError(t.logger, constants.CustomerCountryField)
+	}
+
+	if err := utils.ValidateCurrency(p.InvoiceCurrency); err != nil {
+		return p, err
+	}
+	if err := utils.ValidateCountry(p.CustomerCountry); err != nil {
+		return p, err
 	}
 
 	return p, nil

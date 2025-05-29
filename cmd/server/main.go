@@ -57,7 +57,7 @@ func main() {
 	logConfig := logs.Config{
 		Level:    "info",                           // Example log level
 		Format:   "json",                           // Example log format
-		FilePath: viper.GetString("LOG_FILE_PATH"), // Optional file path for logs, if needed
+		FilePath: viper.GetString("LOG_FILE_PATH"), // Can be set via env LOG_FILE_PATH or config
 	}
 
 	// Create the logger

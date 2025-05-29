@@ -1,0 +1,74 @@
+package tazapay
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+
+	"github.com/mark3labs/mcp-go/mcp"
+
+	"github.com/tazapay/tazapay-mcp-server/constants"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+)
+
+// GetPayinTool fetches a payin by ID
+
+type GetPayinTool struct {
+	logger *slog.Logger
+}
+
+func NewGetPayinTool(logger *slog.Logger) *GetPayinTool {
+	logger.Info("Initializing GetPayinTool")
+	return &GetPayinTool{logger: logger}
+}
+
+func (t *GetPayinTool) Definition() mcp.Tool {
+	return mcp.NewTool(
+		constants.GetPayinToolName,
+		mcp.WithDescription(constants.GetPayinToolDesc),
+		mcp.WithString(constants.GetPayinIDField, mcp.Required(), mcp.Description(constants.GetPayinIDDesc)),
+	)
+}
+
+func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	args, _ := req.Params.Arguments.(map[string]any)
+	t.logger.InfoContext(ctx, "Handling GetPayinTool request", "args", args)
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.logger.Error("Panic recovered in Handle", "panic", r)
+		}
+	}()
+
+	id, ok := args["id"].(string)
+	if !ok || id == "" {
+		err := errors.New("Missing or invalid payin id")
+		t.logger.ErrorContext(ctx, err.Error())
+
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/payin/%s", constants.ProdBaseURL, id)
+
+	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, url, nil, constants.GetHTTPMethod)
+	if err != nil {
+		t.logger.ErrorContext(ctx, "Failed to fetch payin", "error", err)
+		return nil, err
+	}
+
+	data, ok := resp["data"].(map[string]any)
+	if !ok {
+		t.logger.ErrorContext(ctx, "No data in get payin API response", "resp", resp)
+		return nil, constants.ErrNoDataInResponse
+	}
+
+	result := &mcp.CallToolResult{
+		Content: []mcp.Content{
+			mcp.TextContent{Type: "text", Text: fmt.Sprintf("Payin data: %+v", data)},
+		},
+	}
+	t.logger.InfoContext(ctx, "Successfully handled GetPayinTool request", "result", result)
+
+	return result, nil
+}

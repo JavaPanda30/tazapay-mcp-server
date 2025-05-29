@@ -27,16 +27,14 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 	t.logger.Info("Registering CreateBeneficiaryTool with MCP")
 
 	return mcp.NewTool(
-		"create_beneficiary_tool",
-		mcp.WithDescription("Create a beneficiary on Tazapay"),
-		mcp.WithString("name", mcp.Required()),
-		mcp.WithString("email"),
-		mcp.WithString("type", mcp.Required(), mcp.Enum("individual", "business")),
-		mcp.WithString("national_identification_number"),
-		mcp.WithString("tax_id"),
-
-		// Destination details object with correct required array at object level
-		mcp.WithObject("destination_details", mcp.Required(),
+		constants.CreateBeneficiaryToolName,
+		mcp.WithDescription(constants.CreateBeneficiaryToolDesc),
+		mcp.WithString(constants.BeneficiaryNameField, mcp.Required()),
+		mcp.WithString(constants.BeneficiaryEmailField),
+		mcp.WithString(constants.BeneficiaryTypeField, mcp.Required(), mcp.Enum("individual", "business")),
+		mcp.WithString(constants.BeneficiaryNationalIdField),
+		mcp.WithString(constants.BeneficiaryTaxIdField),
+		mcp.WithObject(constants.BeneficiaryDestinationDetailsField, mcp.Required(),
 			mcp.Properties(map[string]any{
 				"type": map[string]any{
 					"type": "string",
@@ -45,6 +43,15 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 				"bank": map[string]any{
 					"type": "object",
 					"properties": map[string]any{
+						"account_number": map[string]any{"type": "string"},
+						"iban":           map[string]any{"type": "string"},
+						"bank_name":      map[string]any{"type": "string"},
+						"branch_name":    map[string]any{"type": "string"},
+						"country":        map[string]any{"type": "string", "description": "ISO 3166 standard alpha-2 code. eg: SG, IN, US, etc."},
+						"currency":       map[string]any{"type": "string", "description": "Currency in which the beneficiary will receive funds (in uppercase, ISO-4217 standard, e.g., USD, EUR)"},
+						"purpose_code":   map[string]any{"type": "string"},
+						"firc_required":  map[string]any{"type": "boolean"},
+						"account_type":   map[string]any{"type": "string"},
 						"bank_codes": map[string]any{
 							"type": "object",
 							"properties": map[string]any{
@@ -58,15 +65,6 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 								"bank_code":   map[string]any{"type": "string"},
 								"cnaps":       map[string]any{"type": "string"},
 							},
-							"account_number": map[string]any{"type": "string"},
-							"iban":           map[string]any{"type": "string"},
-							"bank_name":      map[string]any{"type": "string"},
-							"branch_name":    map[string]any{"type": "string"},
-							"country":        map[string]any{"type": "string"},
-							"currency":       map[string]any{"type": "string"},
-							"purpose_code":   map[string]any{"type": "string"},
-							"firc_required":  map[string]any{"type": "boolean"},
-							"account_type":   map[string]any{"type": "string"},
 						},
 					},
 				},
@@ -75,7 +73,7 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 					"properties": map[string]any{
 						"deposit_address": map[string]any{"type": "string"},
 						"type":            map[string]any{"type": "string"},
-						"currency":        map[string]any{"type": "string"},
+						"currency":        map[string]any{"type": "string", "description": "Currency in which the beneficiary will receive funds (in uppercase, ISO-4217 standard, e.g., USD, EUR)"},
 					},
 				},
 				"local_payment_network": map[string]any{
@@ -87,7 +85,6 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 					},
 				},
 			}),
-			// Add required array for destination_details object
 			mcp.Required(),
 		),
 
@@ -107,12 +104,12 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 				"city":        map[string]any{"type": "string"},
 				"state":       map[string]any{"type": "string"},
 				"postal_code": map[string]any{"type": "string"},
-				"country":     map[string]any{"type": "string"},
+				"country":     map[string]any{"type": "string", "description": "ISO 3166 standard alpha-2 code. eg: SG, IN, US, etc."},
 			}),
 		),
 
 		// Documents object
-		mcp.WithObject("documents",
+		mcp.WithObject("document",
 			mcp.Properties(map[string]any{
 				"type": map[string]any{"type": "string"},
 				"url":  map[string]any{"type": "string"},
@@ -132,7 +129,7 @@ func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 		}
 	}()
 
-	var payload types.DestinationRequest
+	var payload types.CreateBeneficiaryRequest
 	if err := utils.MapToStruct(args, &payload); err != nil {
 		t.logger.ErrorContext(ctx, "Failed to map arguments to struct", "error", err)
 		return nil, err
@@ -145,6 +142,41 @@ func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
+	}
+
+	// Validate currency and country in destination_details if present
+	if dest, ok := args[constants.BeneficiaryDestinationDetailsField].(map[string]any); ok {
+		if bank, ok := dest["bank"].(map[string]any); ok {
+			if currency, ok := bank["currency"].(string); ok && currency != "" {
+				if err := utils.ValidateCurrency(currency); err != nil {
+					t.logger.ErrorContext(ctx, err.Error())
+					return nil, err
+				}
+			}
+			if country, ok := bank["country"].(string); ok && country != "" {
+				if err := utils.ValidateCountry(country); err != nil {
+					t.logger.ErrorContext(ctx, err.Error())
+					return nil, err
+				}
+			}
+		}
+		if wallet, ok := dest["wallet"].(map[string]any); ok {
+			if currency, ok := wallet["currency"].(string); ok && currency != "" {
+				if err := utils.ValidateCurrency(currency); err != nil {
+					t.logger.ErrorContext(ctx, err.Error())
+					return nil, err
+				}
+			}
+		}
+	}
+	// Validate country in address if present
+	if address, ok := args["address"].(map[string]any); ok {
+		if country, ok := address["country"].(string); ok && country != "" {
+			if err := utils.ValidateCountry(country); err != nil {
+				t.logger.ErrorContext(ctx, err.Error())
+				return nil, err
+			}
+		}
 	}
 
 	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, constants.CreateBeneficiaryAPIURL, payload, constants.PostHTTPMethod)

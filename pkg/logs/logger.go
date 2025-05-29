@@ -29,9 +29,26 @@ func getDefaultLogPath() string {
 	return filepath.Join(execDir, "logs", "tazapay-mcp-server.log")
 }
 
+// getEnvLogPath returns the log file path from the LOG_FILE_PATH environment variable if set.
+func getEnvLogPath() string {
+	if envPath := os.Getenv("LOG_FILE_PATH"); envPath != "" {
+		return envPath
+	}
+
+	return ""
+}
+
 // New creates a structured logger based on the given config.
+// Priority for log file path:
+//  1. LOG_FILE_PATH environment variable
+//  2. cfg.FilePath
+//  3. default path near executable
 func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
-	logPath := cfg.FilePath
+	logPath := getEnvLogPath()
+	if logPath == "" {
+		logPath = cfg.FilePath
+	}
+
 	if logPath == "" {
 		logPath = getDefaultLogPath()
 	}

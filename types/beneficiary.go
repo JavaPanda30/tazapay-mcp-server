@@ -1,7 +1,7 @@
 package types
 
 // DestinationRequest represents the payload for registering a destination
-type DestinationRequest struct {
+type CreateBeneficiaryRequest struct {
 	DestinationDetails           DestinationDetails `json:"destination_details"`
 	Phone                        *Phone             `json:"phone,omitempty"`
 	Address                      *Address           `json:"address,omitempty"`
@@ -34,6 +34,7 @@ type Bank struct {
 	PurposeCode   string    `json:"purpose_code,omitempty"`
 	AccountType   string    `json:"account_type,omitempty"`
 	FIRCRequired  bool      `json:"firc_required,omitempty"`
+	TransferType  string    `json:"transfer_type,omitempty"`
 }
 
 // BankCodes holds various bank identification codes
@@ -83,4 +84,23 @@ type Address struct {
 type Documents struct {
 	Type string `json:"type,omitempty"`
 	URL  string `json:"url,omitempty"`
+}
+
+// Beneficiary represents the full beneficiary object returned by the API
+// It reuses existing types for nested fields.
+type Beneficiary struct {
+	ID                           string             `json:"id"`
+	Object                       string             `json:"object"`
+	Type                         string             `json:"type"`
+	Name                         string             `json:"name"`
+	Email                        string             `json:"email"`
+	Phone                        *Phone             `json:"phone,omitempty"`
+	Address                      *Address           `json:"address,omitempty"`
+	TaxID                        string             `json:"tax_id"`
+	NationalIdentificationNumber string             `json:"national_identification_number"`
+	CreatedAt                    string             `json:"created_at"`
+	Destination                  string             `json:"destination"`
+	DestinationDetails           DestinationDetails `json:"destination_details"`
+	Documents                    []Documents        `json:"documents"`
+	Metadata                     map[string]any     `json:"metadata"`
 }

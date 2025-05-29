@@ -12,6 +12,8 @@ const (
 	FxPayoutPath    = "/fx/payout"
 	BalancePath     = "/balance"
 	BeneficiaryPath = "/beneficiary"
+	CreatePayin     = "/payin"
+	CreatePayout    = "/payout"
 )
 
 // Production URLs
@@ -20,6 +22,8 @@ const (
 	PaymentFxBaseURLProd    = ProdBaseURL + FxPayoutPath
 	BalanceBaseURLProd      = ProdBaseURL + BalancePath
 	CreateBeneficiaryAPIURL = ProdBaseURL + BeneficiaryPath
+	CreatePayinAPIURL       = ProdBaseURL + CreatePayin
+	CreatePayoutAPIURL      = ProdBaseURL + CreatePayout
 )
 
 // HTTP Method Constants
