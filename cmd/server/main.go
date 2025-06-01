@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
+	"github.com/tazapay/tazapay-mcp-server/pkg/log"
 
-	logs "github.com/tazapay/tazapay-mcp-server/pkg/logs"
 	tools "github.com/tazapay/tazapay-mcp-server/tools/register"
 )
 
@@ -29,7 +29,7 @@ func initConfig(logger *slog.Logger) error {
 		if readErr != nil {
 			var notFoundErr viper.ConfigFileNotFoundError
 			if !errors.As(readErr, &notFoundErr) {
-				logger.Error("Config read error", "error", readErr)
+				logger.ErrorContext(context.Background(), "Config read error", "error", readErr)
 				return readErr
 			}
 		}
@@ -39,7 +39,7 @@ func initConfig(logger *slog.Logger) error {
 	secretKey := viper.GetString("TAZAPAY_API_SECRET")
 
 	if accessKey == "" || secretKey == "" {
-		logger.Error("Missing API credentials")
+		logger.ErrorContext(context.Background(), "Missing API credentials")
 		return constants.ErrMissingAuthKeys
 	}
 
@@ -47,46 +47,48 @@ func initConfig(logger *slog.Logger) error {
 	authToken := base64.StdEncoding.EncodeToString([]byte(authString))
 	viper.Set("TAZAPAY_AUTH_TOKEN", authToken)
 
-	logger.Info("Configuration initialized")
+	logger.InfoContext(context.Background(), "Configuration initialized")
 
 	return nil
 }
 
 func main() {
 	// Create a logger configuration
-	logConfig := logs.Config{
+	logConfig := log.Config{
 		Level:    "info",                           // Example log level
 		Format:   "json",                           // Example log format
 		FilePath: viper.GetString("LOG_FILE_PATH"), // Can be set via env LOG_FILE_PATH or config
 	}
 
 	// Create the logger
-	logger, cleanup, err := logs.New(logConfig) // Empty path = default path near binary
-	defer cleanup(context.Background())
-
-	// Exit if logger failed
-	if err != nil {
+	logger, _, logErr := log.New(logConfig) // Empty path = default path near binary
+	if logErr != nil {
 		os.Exit(1)
 	}
 
+	// Initialize config to obtain the env variables
 	if err := initConfig(logger); err != nil {
-		logger.Error("failed to initialize config", "error", err)
+		logger.ErrorContext(context.Background(), "failed to initialize config", "error", err)
 		os.Exit(1)
 	}
 
+	// Create a new MCP server
 	s := server.NewMCPServer("tazapay", "0.0.1")
 
+	// Register tools with the server
 	tools.RegisterTools(s, logger)
 
-	logger.Info("Started Tazapay MCP Server.")
+	logger.InfoContext(context.Background(), "Started Tazapay MCP Server.")
 
 	// server := server.New(s)
 
 	// Gracefully shutdown at completion of execution
 	// defer server.Shutdown(context.Background())
 
-	if err := server.ServeStdio(s); err != nil {
-		logger.Error("server exited with error", "error", err)
+	// Run the server
+	serveErr := server.ServeStdio(s)
+	if serveErr != nil {
+		logger.ErrorContext(context.Background(), "server exited with error", "error", serveErr)
 		os.Exit(1)
 	}
 }

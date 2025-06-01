@@ -5,20 +5,20 @@ package types
 // Add/modify fields as needed for your payout API
 
 type PayoutRequest struct {
-	Purpose                  string                    `json:"purpose"`
-	Amount                   float64                   `json:"amount"`
-	Currency                 string                    `json:"currency"`
+	LogisticsTrackingDetails *LogisticsTrackingDetails `json:"logistics_tracking_details,omitempty"`
+	StatementDescription     string                    `json:"statement_description,omitempty"`
+	TransactionDescription   string                    `json:"transaction_description,omitempty"`
 	ReferenceID              string                    `json:"reference_id"`
 	Beneficiary              string                    `json:"beneficiary"`
-	BeneficiaryDetails       DestinationDetails        `json:"beneficiary_details"`
-	TransactionDesc          string                    `json:"transaction_desc,omitempty"`
-	StatementDesc            string                    `json:"statement_desc,omitempty"`
+	Purpose                  string                    `json:"purpose"`
 	ChargeType               string                    `json:"charge_type,omitempty"`
 	Type                     string                    `json:"type,omitempty"`
 	HoldingCurrency          string                    `json:"holding_currency,omitempty"`
 	OnBehalfOf               string                    `json:"on_behalf_of,omitempty"`
 	Metadata                 string                    `json:"metadata,omitempty"`
-	LogisticsTrackingDetails *LogisticsTrackingDetails `json:"logistics_tracking_details,omitempty"`
+	Currency                 string                    `json:"currency"`
+	BeneficiaryDetails       Beneficiary               `json:"beneficiary_details"`
+	Amount                   int32                     `json:"amount"`
 }
 
 // LogisticsTrackingDetails represents logistics tracking info for a payout

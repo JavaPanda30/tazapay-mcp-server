@@ -43,7 +43,7 @@ func (t *ExpireCheckoutTool) Handle(ctx context.Context, req mcp.CallToolRequest
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid checkout session id")
+		err := errors.New("missing or invalid checkout session id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err

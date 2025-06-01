@@ -43,7 +43,7 @@ func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid payin id")
+		err := errors.New("missing or invalid payin id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err

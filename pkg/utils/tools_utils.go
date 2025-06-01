@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -20,8 +21,8 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 
 	var result types.BalanceResponse
 	// Unmarshal into the BalanceResponse struct
-	if err := json.Unmarshal(raw, &result); err != nil {
-		return "", fmt.Errorf("failed to parse balance response: %w", err)
+	if unmarshalErr := json.Unmarshal(raw, &result); unmarshalErr != nil {
+		return "", fmt.Errorf("failed to parse balance response: %w", unmarshalErr)
 	}
 
 	// Ensure data is available
@@ -30,12 +31,12 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 	}
 
 	// Normalize currency if provided
-	if len(currency) > 0 && currency != "" {
+	if currency != "" {
 		currencyCode := strings.ToUpper(currency)
 		for _, balance := range result.Data.Available {
 			if strings.EqualFold(balance.Currency, currencyCode) {
 				amountInt := balance.Amount
-				amountFloat := float64(amountInt) / 100.0
+				amountFloat := float64(amountInt) / constants.Num100
 
 				return fmt.Sprintf("%s balance: %.2f", balance.Currency, amountFloat), nil
 			}
@@ -49,7 +50,7 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 
 	for _, balance := range result.Data.Available {
 		amountInt := balance.Amount
-		amountFloat := float64(amountInt) / 100.0
+		amountFloat := float64(amountInt) / constants.Num100
 		output += fmt.Sprintf("- %s: %.2f\n", balance.Currency, amountFloat)
 	}
 

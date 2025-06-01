@@ -3,7 +3,7 @@ package constants
 // Payment Link Tool constants
 const (
 	PaymentLinkToolName = "tazapay_generate_payment_link_tool"
-	PaymentLinkToolDesc = "Generates a payment link with specified invoice details and customer information"
+	PaymentLinkToolDesc = "Generates a checkout payment link with specified invoice details and customer information"
 
 	InvoiceCurrencyField = "invoice_currency"
 	InvoiceCurrencyDesc  = "Currency in which the invoice is to be raised (e.g., USD, EUR)"
@@ -58,10 +58,11 @@ const (
 	BeneficiaryEmailField              = "email"
 	BeneficiaryTypeField               = "type"
 	BeneficiaryTypeDesc                = "Type of beneficiary (individual or business)"
-	BeneficiaryNationalIdField         = "national_identification_number"
-	BeneficiaryTaxIdField              = "tax_id"
+	BeneficiaryNationalIDField         = "national_identification_number"
+	BeneficiaryTaxIDField              = "tax_id"
 	BeneficiaryDestinationDetailsField = "destination_details"
-	BeneficiaryDestinationDetailsDesc  = "Details about the beneficiary's bank account, wallet, or local payment network"
+	BeneficiaryDestinationDetailsDesc  = "Details about the beneficiary's bank account," +
+		" wallet, or local payment network"
 )
 
 // Create Payout Tool constants
@@ -72,7 +73,7 @@ const (
 	PayoutPurposeField            = "purpose"
 	PayoutAmountField             = "amount"
 	PayoutCurrencyField           = "currency"
-	PayoutReferenceIdField        = "reference_id"
+	PayoutReferenceIDField        = "reference_id"
 	PayoutBeneficiaryField        = "beneficiary"
 	PayoutTransactionDescField    = "transaction_description"
 	PayoutStatementDescField      = "statement_descriptor"
@@ -97,7 +98,7 @@ const (
 // Get Payout Tool constants
 const (
 	GetPayoutToolName = "tazapay_get_payout_tool"
-	GetPayoutToolDesc = "Fetch a payout by ID from Tazapay"
+	GetPayoutToolDesc = "Fetch a payout details by ID from Tazapay"
 	GetPayoutIDField  = "id"
 	GetPayoutIDDesc   = "ID of the existing payout"
 )

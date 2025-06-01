@@ -33,8 +33,8 @@ type Bank struct {
 	Currency      string    `json:"currency,omitempty"`
 	PurposeCode   string    `json:"purpose_code,omitempty"`
 	AccountType   string    `json:"account_type,omitempty"`
-	FIRCRequired  bool      `json:"firc_required,omitempty"`
 	TransferType  string    `json:"transfer_type,omitempty"`
+	FIRCRequired  bool      `json:"firc_required,omitempty"`
 }
 
 // BankCodes holds various bank identification codes
@@ -89,18 +89,18 @@ type Documents struct {
 // Beneficiary represents the full beneficiary object returned by the API
 // It reuses existing types for nested fields.
 type Beneficiary struct {
-	ID                           string             `json:"id"`
-	Object                       string             `json:"object"`
-	Type                         string             `json:"type"`
+	Phone                        *Phone             `json:"phone,omitempty"`
+	Metadata                     map[string]any     `json:"metadata"`
+	Address                      *Address           `json:"address,omitempty"`
+	DestinationDetails           DestinationDetails `json:"destination_details"`
 	Name                         string             `json:"name"`
 	Email                        string             `json:"email"`
-	Phone                        *Phone             `json:"phone,omitempty"`
-	Address                      *Address           `json:"address,omitempty"`
+	ID                           string             `json:"id"`
 	TaxID                        string             `json:"tax_id"`
 	NationalIdentificationNumber string             `json:"national_identification_number"`
 	CreatedAt                    string             `json:"created_at"`
 	Destination                  string             `json:"destination"`
-	DestinationDetails           DestinationDetails `json:"destination_details"`
+	Type                         string             `json:"type"`
+	Object                       string             `json:"object"`
 	Documents                    []Documents        `json:"documents"`
-	Metadata                     map[string]any     `json:"metadata"`
 }

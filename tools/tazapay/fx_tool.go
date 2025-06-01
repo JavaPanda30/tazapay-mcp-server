@@ -44,7 +44,7 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 	args := req.Params.Arguments.(map[string]any)
 
 	// validate and extract arguments
-	params, err := validateAndExtractFXArgs(t, args)
+	params, err := validateAndExtractFXArgs(t, ctx, args)
 	if err != nil {
 		t.logger.Error("Argument validation failed", slog.String("error", err.Error()))
 		return nil, err
@@ -73,13 +73,13 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 	exRate, ok1 := data["exchange_rate"].(float64)
 	if !ok1 {
 		t.logger.Error("Invalid type for exchange_rate")
-		return nil, utils.WrapFieldTypeError(t.logger, "exchange_rate")
+		return nil, utils.WrapFieldTypeError(ctx, t.logger, "exchange_rate")
 	}
 
 	converted, ok2 := data["converted_amount"].(float64)
 	if !ok2 {
 		t.logger.Error("Invalid type for converted_amount")
-		return nil, utils.WrapFieldTypeError(t.logger, "converted_amount")
+		return nil, utils.WrapFieldTypeError(ctx, t.logger, "converted_amount")
 	}
 
 	result := fmt.Sprintf("Rate: %.2f, Converted Amount: %.2f", exRate, converted)
@@ -97,20 +97,20 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 }
 
 // validateAndExtractFXArgs validates request arguments and returns structured parameters
-func validateAndExtractFXArgs(t *FXTool, args map[string]any) (types.FXParams, error) {
+func validateAndExtractFXArgs(t *FXTool, ctx context.Context, args map[string]any) (types.FXParams, error) {
 	var p types.FXParams
 	var ok bool
 
 	if p.Amount, ok = args[constants.FXAmountField].(float64); !ok {
-		return p, utils.WrapFieldTypeError(t.logger, constants.FXAmountField)
+		return p, utils.WrapFieldTypeError(ctx, t.logger, constants.FXAmountField)
 	}
 
 	if p.From, ok = args[constants.FXFromField].(string); !ok {
-		return p, utils.WrapFieldTypeError(t.logger, constants.FXFromField)
+		return p, utils.WrapFieldTypeError(ctx, t.logger, constants.FXFromField)
 	}
 
 	if p.To, ok = args[constants.FXToField].(string); !ok {
-		return p, utils.WrapFieldTypeError(t.logger, constants.FXToField)
+		return p, utils.WrapFieldTypeError(ctx, t.logger, constants.FXToField)
 	}
 
 	return p, nil

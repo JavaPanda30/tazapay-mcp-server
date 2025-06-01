@@ -2,7 +2,6 @@ package tazapay
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -19,11 +18,13 @@ type UpdatePayinTool struct {
 }
 
 func NewUpdatePayinTool(logger *slog.Logger) *UpdatePayinTool {
-	logger.Info("Initializing UpdatePayinTool")
+	logger.InfoContext(context.Background(), "Initializing UpdatePayinTool")
 	return &UpdatePayinTool{logger: logger}
 }
 
 func (t *UpdatePayinTool) Definition() mcp.Tool {
+	t.logger.InfoContext(context.Background(), "Defining UpdatePayinTool")
+
 	return mcp.NewTool(
 		"update_payin_tool",
 		mcp.WithDescription("Update a payin on Tazapay without confirming it"),
@@ -46,25 +47,32 @@ func (t *UpdatePayinTool) Definition() mcp.Tool {
 }
 
 func (t *UpdatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, _ := req.Params.Arguments.(map[string]any)
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		err := constants.ErrInvalidType
+		t.logger.ErrorContext(ctx, err.Error())
+
+		return nil, err
+	}
+
 	t.logger.InfoContext(ctx, "Handling UpdatePayinTool request", "args", args)
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid payin id")
+		err := constants.ErrInvalidIDFormat
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
 	}
 
 	// Remove id from args for payload
-	delete(args, "id")
+	delete(args, "id") // no error to check for delete in Go, safe to ignore
 	payload := args
 
 	url := fmt.Sprintf("%s/payin/%s", constants.ProdBaseURL, id)
@@ -81,7 +89,12 @@ func (t *UpdatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		return nil, constants.ErrNoDataInResponse
 	}
 
-	status, _ := data["status"].(string)
+	status, ok := data["status"].(string)
+	if !ok {
+		t.logger.ErrorContext(ctx, "No status in update payin API response", "resp", resp)
+		return nil, constants.ErrNoDataInResponse
+	}
+
 	resultText := "Payin updated. Status: " + status
 
 	result := &mcp.CallToolResult{

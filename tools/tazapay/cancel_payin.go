@@ -19,11 +19,13 @@ type CancelPayinTool struct {
 }
 
 func NewCancelPayinTool(logger *slog.Logger) *CancelPayinTool {
-	logger.Info("Initializing CancelPayinTool")
+	logger.InfoContext(context.Background(), "Initializing CancelPayinTool")
 	return &CancelPayinTool{logger: logger}
 }
 
 func (t *CancelPayinTool) Definition() mcp.Tool {
+	t.logger.InfoContext(context.Background(), "Defining CancelPayinTool")
+
 	return mcp.NewTool(
 		"cancel_payin_tool",
 		mcp.WithDescription("Cancel a payin on Tazapay"),
@@ -32,18 +34,25 @@ func (t *CancelPayinTool) Definition() mcp.Tool {
 }
 
 func (t *CancelPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, _ := req.Params.Arguments.(map[string]any)
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		err := errors.New("invalid arguments type: expected map[string]any")
+		t.logger.ErrorContext(ctx, err.Error())
+
+		return nil, err
+	}
+
 	t.logger.InfoContext(ctx, "Handling CancelPayinTool request", "args", args)
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid payin id")
+		err := constants.ErrInvalidIDFormat
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
@@ -63,8 +72,12 @@ func (t *CancelPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		return nil, constants.ErrNoDataInResponse
 	}
 
-	status, _ := data["status"].(string)
-	resultText := "Payin cancelled. Status: " + status
+	statusVal, ok := data["status"]
+	if !ok {
+		t.logger.ErrorContext(ctx, "Missing 'status' in response data", "data", data)
+		return nil, errors.New("missing 'status' in response data")
+	}
+	resultText := "Payin cancelled. Status: " + statusVal.(string)
 
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{

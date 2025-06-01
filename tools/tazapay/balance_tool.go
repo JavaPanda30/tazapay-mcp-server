@@ -2,6 +2,7 @@ package tazapay
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -27,6 +28,8 @@ func NewBalanceTool(logger *slog.Logger) *BalanceTool {
 
 // Definition returns the tool definition
 func (t *BalanceTool) Definition() mcp.Tool {
+	t.logger.InfoContext(context.Background(), "Defining BalanceTool")
+
 	return mcp.NewTool(
 		constants.BalanceToolName,
 		mcp.WithDescription(constants.BalanceToolDesc),
@@ -36,8 +39,15 @@ func (t *BalanceTool) Definition() mcp.Tool {
 
 // Handle processes tool requests
 func (t *BalanceTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args := req.Params.Arguments.(map[string]any)
-	currency, _ := args["currency"].(string)
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		return nil, errors.New("invalid arguments type")
+	}
+
+	currency, ok := args["currency"].(string)
+	if !ok {
+		return nil, errors.New("currency parameter missing or not a string")
+	}
 
 	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, constants.BalanceBaseURLProd, constants.GetHTTPMethod)
 	if err != nil {

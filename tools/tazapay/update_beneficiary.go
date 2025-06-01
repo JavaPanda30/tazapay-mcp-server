@@ -2,7 +2,6 @@ package tazapay
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -19,11 +18,13 @@ type UpdateBeneficiaryTool struct {
 }
 
 func NewUpdateBeneficiaryTool(logger *slog.Logger) *UpdateBeneficiaryTool {
-	logger.Info("Initializing UpdateBeneficiaryTool")
+	logger.InfoContext(context.Background(), "Initializing UpdateBeneficiaryTool")
 	return &UpdateBeneficiaryTool{logger: logger}
 }
 
 func (t *UpdateBeneficiaryTool) Definition() mcp.Tool {
+	t.logger.InfoContext(context.Background(), "Defining UpdateBeneficiaryTool")
+
 	return mcp.NewTool(
 		"update_beneficiary_tool",
 		mcp.WithDescription("Update an existing beneficiary by ID on Tazapay"),
@@ -113,18 +114,19 @@ func (t *UpdateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid beneficiary id")
+		err := constants.ErrMissingOrInvalidBeneficiaryID
 		t.logger.ErrorContext(ctx, err.Error())
+
 		return nil, err
 	}
 	// Validate beneficiary id prefix using ValidatePrefixId
-	if err := utils.ValidatePrefixId("bnf_", id); err != nil {
+	if err := utils.ValidatePrefixID("bnf_", id); err != nil {
 		t.logger.ErrorContext(ctx, err.Error())
 		return nil, err
 	}
@@ -135,7 +137,7 @@ func (t *UpdateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequ
 
 	url := fmt.Sprintf("%s/beneficiary/%s", constants.ProdBaseURL, id)
 
-	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, url, payload, constants.PutHTTPMethod)
+	resp, err := utils.HandlePUTHttpRequest(ctx, t.logger, url, payload, constants.PutHTTPMethod)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to update beneficiary", "error", err)
 		return nil, err

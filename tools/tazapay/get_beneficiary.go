@@ -47,15 +47,21 @@ func (t *GetBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequest
 	if !ok || id == "" {
 		err := errors.New("missing or invalid beneficiary id")
 		t.logger.ErrorContext(ctx, err.Error())
+
 		return nil, err
 	}
+
+	t.logger.Debug("Fetching beneficiary", "id", id)
+
 	// Validate beneficiary id prefix using ValidatePrefixId
-	if err := utils.ValidatePrefixId("bnf_", id); err != nil {
+	if err := utils.ValidatePrefixID("bnf_", id); err != nil {
 		t.logger.ErrorContext(ctx, err.Error())
 		return nil, err
 	}
 
 	url := fmt.Sprintf("%s/beneficiary/%s", constants.ProdBaseURL, id)
+
+	t.logger.Debug("URL", "url", url)
 
 	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, url, constants.GetHTTPMethod)
 	if err != nil {
@@ -71,6 +77,7 @@ func (t *GetBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequest
 
 	// Use the BeneficiaryDetails struct from types and MapToStruct utility
 	var beneficiary types.Beneficiary
+
 	err = utils.MapToStruct(data, &beneficiary)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to map data to BeneficiaryDetails struct", "error", err)
@@ -85,6 +92,7 @@ func (t *GetBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequest
 				if err != nil {
 					return mcp.TextContent{Type: "text", Text: fmt.Sprintf("Beneficiary: %+v", beneficiary)}
 				}
+
 				return mcp.TextContent{Type: "text", Text: string(jsonBytes)}
 			}(),
 		},

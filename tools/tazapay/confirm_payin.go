@@ -20,11 +20,13 @@ type ConfirmPayinTool struct {
 }
 
 func NewConfirmPayinTool(logger *slog.Logger) *ConfirmPayinTool {
-	logger.Info("Initializing ConfirmPayinTool")
+	logger.InfoContext(context.Background(), "Initializing ConfirmPayinTool")
 	return &ConfirmPayinTool{logger: logger}
 }
 
 func (t *ConfirmPayinTool) Definition() mcp.Tool {
+	t.logger.InfoContext(context.Background(), "Defining ConfirmPayinTool")
+
 	return mcp.NewTool(
 		"confirm_payin_tool",
 		mcp.WithDescription("Confirm a payin and create a payment attempt on Tazapay"),
@@ -47,19 +49,28 @@ func (t *ConfirmPayinTool) Definition() mcp.Tool {
 	)
 }
 
-func (t *ConfirmPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, _ := req.Params.Arguments.(map[string]any)
+func (t *ConfirmPayinTool) Handle(ctx context.Context,
+	req mcp.CallToolRequest,
+) (*mcp.CallToolResult, error) {
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		err := errors.New("invalid arguments type for ConfirmPayinTool")
+		t.logger.ErrorContext(ctx, err.Error())
+
+		return nil, err
+	}
+
 	t.logger.InfoContext(ctx, "Handling ConfirmPayinTool request", "args", args)
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid payin id")
+		err := errors.New("missing or invalid payin id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
@@ -83,8 +94,17 @@ func (t *ConfirmPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) 
 		return nil, constants.ErrNoDataInResponse
 	}
 
-	status, _ := data["status"].(string)
-	statusDesc, _ := data["status_description"].(string)
+	status, ok := data["status"].(string)
+	if !ok {
+		t.logger.ErrorContext(ctx, "Missing or invalid status in response", "data", data)
+		return nil, errors.New("missing or invalid status in response")
+	}
+
+	statusDesc, ok := data["status_description"].(string)
+	if !ok {
+		t.logger.ErrorContext(ctx, "Missing or invalid status_description in response", "data", data)
+		return nil, errors.New("missing or invalid status_description in response")
+	}
 	resultText := fmt.Sprintf("Payin confirmed. Status: %s. %s", status, statusDesc)
 
 	result := &mcp.CallToolResult{

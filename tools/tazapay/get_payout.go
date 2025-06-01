@@ -43,7 +43,7 @@ func (t *GetPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid payout id")
+		err := errors.New("missing or invalid payout id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
@@ -51,7 +51,7 @@ func (t *GetPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*m
 
 	url := fmt.Sprintf("%s/payout/%s", constants.ProdBaseURL, id)
 
-	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, url, nil, constants.GetHTTPMethod)
+	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, url, constants.GetHTTPMethod)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to fetch payout", "error", err)
 		return nil, err

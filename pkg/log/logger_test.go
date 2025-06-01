@@ -8,10 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	log "github.com/tazapay/tazapay-mcp-server/pkg/logs"
+	log "github.com/tazapay/tazapay-mcp-server/pkg/log"
 )
 
 func getTestContext(t *testing.T) context.Context {
+	t.Helper()
 	// Go 1.20+ provides t.Context(), otherwise fallback
 	tCtxMethod := reflect.ValueOf(t).MethodByName("Context")
 	if tCtxMethod.IsValid() {
@@ -71,7 +72,10 @@ func TestLoggerUsesEnvLogFilePath(t *testing.T) {
 	tmpDir := t.TempDir()
 	logPath := filepath.Join(tmpDir, "envlog.log")
 
-	os.Setenv("LOG_FILE_PATH", logPath)
+	err := log.Set("LOG_FILE_PATH", logPath)
+	if err != nil {
+		t.Fatalf("failed to set LOG_FILE_PATH: %v", err)
+	}
 	defer os.Unsetenv("LOG_FILE_PATH")
 
 	cfg := log.Config{

@@ -42,8 +42,8 @@ func (t *FundPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*
 	}()
 
 	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		err := errors.New("Missing or invalid payout id")
+	if !ok || id == "" || utils.ValidatePrefixID("pot_", id) != nil {
+		err := errors.New("missing or invalid payout id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err

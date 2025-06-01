@@ -31,7 +31,7 @@ func getDefaultLogPath() string {
 
 // getEnvLogPath returns the log file path from the LOG_FILE_PATH environment variable if set.
 func getEnvLogPath() string {
-	if envPath := os.Getenv("LOG_FILE_PATH"); envPath != "" {
+	if envPath := Get("LOG_FILE_PATH"); envPath != "" {
 		return envPath
 	}
 
@@ -72,8 +72,9 @@ func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
 	logger := slog.New(handler)
 
 	cleanup := func(ctx context.Context) {
-		if err := file.Close(); err != nil {
-			logger.WarnContext(ctx, "Failed to close log file", "error", err.Error())
+		cerr := file.Close()
+		if cerr != nil {
+			logger.WarnContext(ctx, "Failed to close log file", "error", cerr.Error())
 		}
 	}
 

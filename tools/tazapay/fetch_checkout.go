@@ -43,7 +43,7 @@ func (t *FetchCheckoutTool) Handle(ctx context.Context, req mcp.CallToolRequest)
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" {
-		err := errors.New("Missing or invalid checkout session id")
+		err := errors.New("missing or invalid checkout session id")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
@@ -51,7 +51,7 @@ func (t *FetchCheckoutTool) Handle(ctx context.Context, req mcp.CallToolRequest)
 
 	url := fmt.Sprintf("%s/checkout/%s", constants.ProdBaseURL, id)
 
-	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, url, nil, constants.GetHTTPMethod)
+	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, url, constants.GetHTTPMethod)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to fetch checkout session", "error", err)
 		return nil, err
