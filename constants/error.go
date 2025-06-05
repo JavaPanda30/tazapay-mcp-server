@@ -21,4 +21,8 @@ var (
 	ErrInvalidCountryFormat          = errors.New("invalid country format")
 	ErrInvalidIDFormat               = errors.New("invalid id format")
 	ErrMissingOrInvalidBeneficiaryID = errors.New("missing or invalid beneficiary id")
+	ErrMissingOrInvalidPayoutID      = errors.New("missing or invalid payout id, should be starting with pot_")
+	ErrInvalidArgumentsType          = errors.New("invalid arguments type for GetPayoutTool")
+	ErrNoStatusInFundPayoutData      = errors.New("no status in fund payout data")
+	ErrBeneficiaryOrDetailsRequired  = errors.New("either 'beneficiary' or 'beneficiary_details' must be provided, but not both or neither")
 )

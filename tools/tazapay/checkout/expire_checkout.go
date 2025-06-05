@@ -1,4 +1,4 @@
-package tazapay
+package checkout
 
 import (
 	"context"

@@ -7,7 +7,13 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/tazapay/tazapay-mcp-server/tools/tazapay"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/balance"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/beneficiary"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/checkout"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/customer"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/payin"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/paymentattempt"
+	"github.com/tazapay/tazapay-mcp-server/tools/tazapay/payout"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -20,23 +26,25 @@ func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
 	logger.InfoContext(context.Background(), "Registering tools with MCP server")
 
 	tools := []types.Tool{
-		tazapay.NewFXTool(logger),
-		tazapay.NewPaymentLinkTool(logger),
-		tazapay.NewBalanceTool(logger),
-		tazapay.NewCreateBeneficiaryTool(logger),
-		tazapay.NewCreatePayoutTool(logger),
-		tazapay.NewCreatePayinTool(logger),
-		tazapay.NewConfirmPayinTool(logger),
-		tazapay.NewUpdatePayinTool(logger),
-		tazapay.NewCancelPayinTool(logger),
-		tazapay.NewGetPayinTool(logger),
-		tazapay.NewFetchCheckoutTool(logger),
-		tazapay.NewExpireCheckoutTool(logger),
-		tazapay.NewGetPayoutTool(logger),
-		tazapay.NewFundPayoutTool(logger),
-		tazapay.NewGetPaymentAttemptTool(logger),
-		tazapay.NewGetBeneficiaryTool(logger),
-		tazapay.NewUpdateBeneficiaryTool(logger),
+		balance.NewFXTool(logger),
+		balance.NewBalanceTool(logger),
+		payout.NewGetPayoutTool(logger),
+		payout.NewFundPayoutTool(logger),
+		payout.NewCreatePayoutTool(logger),
+		payin.NewGetPayinTool(logger),
+		payin.NewCreatePayinTool(logger),
+		payin.NewUpdatePayinTool(logger),
+		payin.NewCancelPayinTool(logger),
+		payin.NewConfirmPayinTool(logger),
+		checkout.NewPaymentLinkTool(logger),
+		checkout.NewFetchCheckoutTool(logger),
+		checkout.NewExpireCheckoutTool(logger),
+		beneficiary.NewGetBeneficiaryTool(logger),
+		beneficiary.NewCreateBeneficiaryTool(logger),
+		beneficiary.NewUpdateBeneficiaryTool(logger),
+		paymentattempt.NewGetPaymentAttemptTool(logger),
+		customer.NewCreateCustomerTool(logger),
+		customer.NewFetchCustomerTool(logger),
 	}
 
 	for _, tool := range tools {

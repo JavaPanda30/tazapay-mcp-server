@@ -90,7 +90,7 @@ const (
 // Get Payin Tool constants
 const (
 	GetPayinToolName = "tazapay_get_payin_tool"
-	GetPayinToolDesc = "Fetch a payin by ID from Tazapay"
+	GetPayinToolDesc = "Fetch a payin details by ID from Tazapay"
 	GetPayinIDField  = "id"
 	GetPayinIDDesc   = "ID of the already created payin"
 )
@@ -121,4 +121,12 @@ const (
 	CreatePayinAmountDesc           = "Payment amount value"
 	CreatePayinCustomerDetailsField = "customer_details"
 	CreatePayinCustomerDetailsDesc  = "Customer details object (name, email, country, phone)"
+)
+
+// Cancel Payin Tool constants
+const (
+	CancelPayinToolName = "tazapay_cancel_payin_tool"
+	CancelPayinToolDesc = "Cancel a payin on Tazapay"
+	CancelPayinIDField  = "id"
+	CancelPayinIDDesc   = "ID of the already created payin to cancel"
 )

@@ -1,4 +1,4 @@
-package tazapay
+package paymentattempt
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func (t *GetPaymentAttemptTool) Handle(ctx context.Context, req mcp.CallToolRequ
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" || utils.ValidatePrefixID("pat_", id) != nil {
-		err := errors.New("missing or invalid payment attempt id")
+		err := errors.New("missing or invalid payment attempt id, should be starting with pat_")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err

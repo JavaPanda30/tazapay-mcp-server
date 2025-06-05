@@ -1,4 +1,4 @@
-package tazapay
+package payin
 
 import (
 	"context"
@@ -27,9 +27,9 @@ func (t *CancelPayinTool) Definition() mcp.Tool {
 	t.logger.InfoContext(context.Background(), "Defining CancelPayinTool")
 
 	return mcp.NewTool(
-		"cancel_payin_tool",
-		mcp.WithDescription("Cancel a payin on Tazapay"),
-		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the already created payin")),
+		constants.CancelPayinToolName,
+		mcp.WithDescription(constants.CancelPayinToolDesc),
+		mcp.WithString(constants.GetPayinIDField, mcp.Required(), mcp.Description(constants.CancelPayinIDDesc)),
 	)
 }
 
@@ -50,7 +50,7 @@ func (t *CancelPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		}
 	}()
 
-	id, ok := args["id"].(string)
+	id, ok := args[constants.GetPayinIDField].(string)
 	if !ok || id == "" {
 		err := constants.ErrInvalidIDFormat
 		t.logger.ErrorContext(ctx, err.Error())

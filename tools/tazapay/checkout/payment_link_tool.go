@@ -1,7 +1,8 @@
-package tazapay
+package checkout
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -86,6 +87,13 @@ func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		return nil, constants.ErrNoBeneficiaryID // Use static error
 	}
 
+	// Marshal the full data to JSON for output
+	fullDataJSON, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.logger.ErrorContext(ctx, "failed to marshal full data for output", slog.String("error", err.Error()))
+		fullDataJSON = []byte("<failed to marshal data>")
+	}
+
 	t.logger.InfoContext(ctx, "payment link successfully generated",
 		slog.String("url", paymentLink),
 		slog.String("id", paymentID),
@@ -96,9 +104,10 @@ func (t *PaymentLinkTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 			mcp.TextContent{
 				Type: "text",
 				Text: fmt.Sprintf(
-					"Payment Link URL: %s\nPayment Link ID: %s",
+					"Payment Link URL: %s\nPayment Link ID: %s\nFull Data: %s",
 					paymentLink,
 					paymentID,
+					string(fullDataJSON),
 				),
 			},
 		},

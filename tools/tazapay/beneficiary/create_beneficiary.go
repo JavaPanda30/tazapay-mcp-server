@@ -1,4 +1,4 @@
-package tazapay
+package beneficiary
 
 import (
 	"context"
@@ -234,6 +234,12 @@ func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
 func (t *CreateBeneficiaryTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args, _ := req.Params.Arguments.(map[string]any)
 	t.logger.InfoContext(ctx, "Handling CreateBeneficiaryTool request", "args", args)
+
+	// Preprocess: Move bank code fields into bank_codes if present at top level of bank
+	if dest, ok := args[constants.BeneficiaryDestinationDetailsField].(map[string]any); ok {
+		utils.MoveBankCodesToNested(dest)
+		args[constants.BeneficiaryDestinationDetailsField] = dest
+	}
 
 	defer func() {
 		if r := recover(); r != nil {

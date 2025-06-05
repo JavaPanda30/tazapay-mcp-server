@@ -87,7 +87,9 @@ func HandlePOSTHttpRequest(ctx context.Context, logger *slog.Logger, url string,
 	return result, nil
 }
 
-func HandleGETHttpRequest(ctx context.Context, logger *slog.Logger, url, method string) (map[string]any, error) {
+func HandleGETHttpRequest(ctx context.Context, logger *slog.Logger,
+	url, method string,
+) (map[string]any, error) {
 	headers := map[string]string{
 		constants.HeaderAccept:        constants.AcceptJSON,
 		constants.HeaderAuthorization: constants.AuthSchemeBasic + viper.GetString(constants.StrTAZAPAYAuthToken),
@@ -194,6 +196,7 @@ func HandlePUTHttpRequest(ctx context.Context, logger *slog.Logger,
 
 	if resp.StatusCode < constants.HTTPStatusOKMin ||
 		resp.StatusCode >= constants.HTTPStatusOKMax {
+
 		logger.ErrorContext(ctx, constants.StrNonSuccessHTTPResponse,
 			slog.Int(constants.StrStatusCode, resp.StatusCode),
 			slog.String(constants.StrBody, string(bodyBytes)),
@@ -216,7 +219,9 @@ func HandlePUTHttpRequest(ctx context.Context, logger *slog.Logger,
 	return result, nil
 }
 
-func HandleDELETEHttpRequest(ctx context.Context, logger *slog.Logger, url, method string) (map[string]any, error) {
+func HandleDELETEHttpRequest(ctx context.Context, logger *slog.Logger,
+	url, method string,
+) (map[string]any, error) {
 	headers := map[string]string{
 		constants.HeaderAccept:        constants.AcceptJSON,
 		constants.HeaderAuthorization: constants.AuthSchemeBasic + viper.GetString(constants.StrTAZAPAYAuthToken),

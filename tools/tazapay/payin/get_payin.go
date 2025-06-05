@@ -1,7 +1,8 @@
-package tazapay
+package payin
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -42,8 +43,8 @@ func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mc
 	}()
 
 	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		err := errors.New("missing or invalid payin id")
+	if !ok || id == "" || utils.ValidatePrefixID("pay_", id) != nil {
+		err := errors.New("missing or invalid payin id, should be starting with pay_")
 		t.logger.ErrorContext(ctx, err.Error())
 
 		return nil, err
@@ -51,7 +52,7 @@ func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mc
 
 	url := fmt.Sprintf("%s/payin/%s", constants.ProdBaseURL, id)
 
-	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, url, nil, constants.GetHTTPMethod)
+	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, url, constants.GetHTTPMethod)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to fetch payin", "error", err)
 		return nil, err
@@ -63,9 +64,16 @@ func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mc
 		return nil, constants.ErrNoDataInResponse
 	}
 
+	// Marshal the data to pretty JSON
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.logger.ErrorContext(ctx, "Failed to marshal payin data to JSON", "error", err)
+		return nil, err
+	}
+
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{
-			mcp.TextContent{Type: "text", Text: fmt.Sprintf("Payin data: %+v", data)},
+			mcp.TextContent{Type: "text", Text: string(jsonBytes)},
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled GetPayinTool request", "result", result)

@@ -22,4 +22,24 @@ const (
 	StrWrappedErrorWithBody       = "%w: %v, body: %s"
 	StrFailedToDecodeResponseJSON = "Failed to decode response JSON"
 	StrErrorDecodingResponse      = "error decoding response: %w"
+
+	// Common string keys for payloads, logs, and validation
+	KeyError              = "error"
+	KeyData               = "data"
+	KeyBeneficiaryDetails = "beneficiary_details"
+	KeyCurrency           = "currency"
+	KeyPurpose            = "purpose"
+	KeyTransactionDesc    = "transaction_description"
+	KeyAddress            = "address"
+	KeyCountry            = "country"
+	KeyBank               = "bank"
+	KeyWallet             = "wallet"
+
+	// Add string constants for repeated schema keys
+	KeyObject      = "object"
+	KeyProperties  = "properties"
+	KeyType        = "type"
+	KeyString      = "string"
+	KeyBoolean     = "boolean"
+	KeyDescription = "description"
 )

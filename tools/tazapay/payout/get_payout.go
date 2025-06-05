@@ -1,8 +1,8 @@
-package tazapay
+package payout
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -19,11 +19,10 @@ type GetPayoutTool struct {
 }
 
 func NewGetPayoutTool(logger *slog.Logger) *GetPayoutTool {
-	logger.Info("Initializing GetPayoutTool")
 	return &GetPayoutTool{logger: logger}
 }
 
-func (t *GetPayoutTool) Definition() mcp.Tool {
+func (*GetPayoutTool) Definition() mcp.Tool {
 	return mcp.NewTool(
 		constants.GetPayoutToolName,
 		mcp.WithDescription(constants.GetPayoutToolDesc),
@@ -32,21 +31,24 @@ func (t *GetPayoutTool) Definition() mcp.Tool {
 }
 
 func (t *GetPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, _ := req.Params.Arguments.(map[string]any)
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		t.logger.ErrorContext(ctx, "Invalid arguments type for GetPayoutTool")
+		return nil, fmt.Errorf("%w", constants.ErrInvalidArgumentsType)
+	}
+
 	t.logger.InfoContext(ctx, "Handling GetPayoutTool request", "args", args)
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
-	if !ok || id == "" {
-		err := errors.New("missing or invalid payout id")
-		t.logger.ErrorContext(ctx, err.Error())
-
-		return nil, err
+	if !ok || id == "" || utils.ValidatePrefixID("pot_", id) != nil {
+		t.logger.ErrorContext(ctx, constants.ErrMissingOrInvalidPayoutID.Error())
+		return nil, constants.ErrMissingOrInvalidPayoutID
 	}
 
 	url := fmt.Sprintf("%s/payout/%s", constants.ProdBaseURL, id)
@@ -63,9 +65,15 @@ func (t *GetPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*m
 		return nil, constants.ErrNoDataInResponse
 	}
 
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.logger.ErrorContext(ctx, "Failed to marshal payout data", "error", err)
+		return nil, err
+	}
+
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{
-			mcp.TextContent{Type: "text", Text: fmt.Sprintf("Payout data: %+v", data)},
+			mcp.TextContent{Type: "text", Text: string(jsonBytes)},
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled GetPayoutTool request", "result", result)

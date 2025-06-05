@@ -71,3 +71,36 @@ func MapToStruct(input map[string]any, out any) error {
 
 	return nil
 }
+
+// MoveBankCodesToNested moves bank code fields from the top level of the bank map into a nested bank_codes map.
+func MoveBankCodesToNested(dest map[string]any) {
+	bank, ok := dest["bank"].(map[string]any)
+	if !ok {
+		return
+	}
+	bankCodeFields := []string{
+		"swift_code", "bic_code", "ifsc_code", "aba_code",
+		"sort_code", "branch_code", "bsb_code", "bank_code", "cnaps",
+	}
+	bankCodes := make(map[string]any)
+
+	for _, field := range bankCodeFields {
+		if val, exists := bank[field]; exists {
+			bankCodes[field] = val
+
+			delete(bank, field)
+		}
+	}
+
+	if len(bankCodes) > 0 {
+		if existing, ok2 := bank["bank_codes"].(map[string]any); ok2 {
+			for k, v := range bankCodes {
+				existing[k] = v
+			}
+			bank["bank_codes"] = existing
+		} else {
+			bank["bank_codes"] = bankCodes
+		}
+		dest["bank"] = bank
+	}
+}

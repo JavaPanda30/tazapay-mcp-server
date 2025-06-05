@@ -1,7 +1,8 @@
-package tazapay
+package checkout
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -63,9 +64,15 @@ func (t *FetchCheckoutTool) Handle(ctx context.Context, req mcp.CallToolRequest)
 		return nil, constants.ErrNoDataInResponse
 	}
 
+	fullDataJSON, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.logger.ErrorContext(ctx, "failed to marshal full data for output", "error", err.Error())
+		fullDataJSON = []byte("<failed to marshal data>")
+	}
+
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{
-			mcp.TextContent{Type: "text", Text: fmt.Sprintf("Checkout session data: %+v", data)},
+			mcp.TextContent{Type: "text", Text: "Checkout session data: " + string(fullDataJSON)},
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled FetchCheckoutTool request", "result", result)

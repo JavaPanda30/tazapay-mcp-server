@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -61,14 +62,16 @@ func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
 
 	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, constants.OpenFileMode)
 	if err != nil {
-		// Still allowed to use Fprintf on stderr if logger isn't ready
 		fmt.Fprintf(os.Stderr,
 			"Warning: Failed to open log file: %v\nFalling back to stderr\n", err)
 
 		return fallbackLogger(cfg), func(context.Context) {}, err
 	}
 
-	handler := getHandler(cfg, file)
+	// Create a multi-writer to write to both file and stdout
+	multiWriter := io.MultiWriter(file, os.Stdout)
+
+	handler := getHandler(cfg, multiWriter)
 	logger := slog.New(handler)
 
 	cleanup := func(ctx context.Context) {
@@ -78,7 +81,6 @@ func New(cfg Config) (*slog.Logger, func(ctx context.Context), error) {
 		}
 	}
 
-	// Using InfoContext with a background context
 	logger.InfoContext(context.Background(), "Logs are stored in", "path", logPath)
 
 	return logger, cleanup, nil
@@ -91,17 +93,25 @@ func fallbackLogger(cfg Config) *slog.Logger {
 }
 
 // getHandler creates the appropriate slog handler.
-func getHandler(cfg Config, out *os.File) slog.Handler {
+func getHandler(cfg Config, out any) slog.Handler {
 	opts := &slog.HandlerOptions{
 		Level: parseLogLevel(cfg.Level),
 	}
 
 	switch strings.ToLower(cfg.Format) {
 	case "json":
-		return slog.NewJSONHandler(out, opts)
+		if w, ok := out.(io.Writer); ok {
+			return slog.NewJSONHandler(w, opts)
+		}
+
+		panic("getHandler: out is not an io.Writer for JSON format")
 
 	default:
-		return slog.NewTextHandler(out, opts)
+		if w, ok := out.(io.Writer); ok {
+			return slog.NewTextHandler(w, opts)
+		}
+
+		panic("getHandler: out is not an io.Writer for text format")
 	}
 }
 

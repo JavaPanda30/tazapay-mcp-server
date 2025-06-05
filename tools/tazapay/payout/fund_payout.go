@@ -1,8 +1,7 @@
-package tazapay
+package payout
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -19,11 +18,11 @@ type FundPayoutTool struct {
 }
 
 func NewFundPayoutTool(logger *slog.Logger) *FundPayoutTool {
-	logger.Info("Initializing FundPayoutTool")
+	logger.InfoContext(context.Background(), "Initializing FundPayoutTool")
 	return &FundPayoutTool{logger: logger}
 }
 
-func (t *FundPayoutTool) Definition() mcp.Tool {
+func (*FundPayoutTool) Definition() mcp.Tool {
 	return mcp.NewTool(
 		"fund_payout_tool",
 		mcp.WithDescription("Fund a payout in requires_funding state by ID on Tazapay"),
@@ -32,21 +31,24 @@ func (t *FundPayoutTool) Definition() mcp.Tool {
 }
 
 func (t *FundPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, _ := req.Params.Arguments.(map[string]any)
+	args, ok := req.Params.Arguments.(map[string]any)
+	if !ok {
+		t.logger.ErrorContext(ctx, "Invalid arguments type for FundPayoutTool")
+		return nil, fmt.Errorf("%w", constants.ErrInvalidArgumentsType)
+	}
+
 	t.logger.InfoContext(ctx, "Handling FundPayoutTool request", "args", args)
 
 	defer func() {
 		if r := recover(); r != nil {
-			t.logger.Error("Panic recovered in Handle", "panic", r)
+			t.logger.ErrorContext(ctx, "Panic recovered in Handle", "panic", r)
 		}
 	}()
 
 	id, ok := args["id"].(string)
 	if !ok || id == "" || utils.ValidatePrefixID("pot_", id) != nil {
-		err := errors.New("missing or invalid payout id")
-		t.logger.ErrorContext(ctx, err.Error())
-
-		return nil, err
+		t.logger.ErrorContext(ctx, constants.ErrMissingOrInvalidPayoutID.Error())
+		return nil, constants.ErrMissingOrInvalidPayoutID
 	}
 
 	url := fmt.Sprintf("%s/payout/%s/fund", constants.ProdBaseURL, id)
@@ -63,7 +65,11 @@ func (t *FundPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*
 		return nil, constants.ErrNoDataInResponse
 	}
 
-	status, _ := data["status"].(string)
+	status, ok := data["status"].(string)
+	if !ok {
+		t.logger.ErrorContext(ctx, "No status in fund payout data", "data", data)
+		return nil, constants.ErrNoStatusInFundPayoutData
+	}
 	resultText := "Payout funded. Status: " + status
 
 	result := &mcp.CallToolResult{
@@ -71,7 +77,9 @@ func (t *FundPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*
 			mcp.TextContent{Type: "text", Text: resultText},
 		},
 	}
+	err = nil
+
 	t.logger.InfoContext(ctx, "Successfully handled FundPayoutTool request", "result", result)
 
-	return result, nil
+	return result, err
 }

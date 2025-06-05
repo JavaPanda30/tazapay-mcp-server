@@ -1,4 +1,4 @@
-package tazapay
+package payin
 
 import (
 	"context"
@@ -102,7 +102,7 @@ func (t *CreatePayinTool) Definition() mcp.Tool {
 		mcp.WithBoolean("confirm"),
 		mcp.WithString("statement_descriptor"),
 		mcp.WithObject("payment_method_details"),
-		mcp.WithString("session_id", mcp.Required()),
+		mcp.WithString("session_id"),
 	)
 }
 
@@ -115,12 +115,6 @@ func (t *CreatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 			t.logger.Error("Panic recovered in Handle", "panic", r)
 		}
 	}()
-
-	var payload map[string]any
-	if err := utils.MapToStruct(args, &payload); err != nil {
-		t.logger.ErrorContext(ctx, "Failed to map arguments to struct", "error", err)
-		return nil, err
-	}
 
 	// Validate currency
 	if currency, ok := args["invoice_currency"].(string); ok && currency != "" {
@@ -139,7 +133,58 @@ func (t *CreatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 		}
 	}
 
-	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, constants.ProdBaseURL+"/payin", payload, constants.PostHTTPMethod)
+	// Build payload with only required and non-empty fields
+	payload := make(map[string]any)
+
+	// Required fields
+	if v, ok := args["amount"]; ok {
+		payload["amount"] = v
+	}
+
+	if v, ok := args["invoice_currency"]; ok {
+		payload["invoice_currency"] = v
+	}
+
+	if v, ok := args["transaction_description"]; ok {
+		payload["transaction_description"] = v
+	}
+
+	if v, ok := args["confirm"]; ok {
+		payload["confirm"] = v
+	}
+
+	// Optionally add other fields only if they are non-empty
+	optionalFields := []string{
+		"customer_details", "customer", "success_url", "cancel_url", "webhook_url", "shipping_details", "billing_details", "transaction_documents", "metadata", "reference_id", "statement_descriptor", "payment_method_details", "session_id",
+	}
+	for _, field := range optionalFields {
+		if v, ok := args[field]; ok {
+			// Only add if not nil, not empty map, and not empty string
+			switch val := v.(type) {
+			case string:
+				if val != "" {
+					payload[field] = val
+				}
+
+			case map[string]any:
+				if len(val) > 0 {
+					payload[field] = val
+				}
+
+			case []any:
+				if len(val) > 0 {
+					payload[field] = val
+				}
+
+			case nil:
+				// skip
+			default:
+				payload[field] = val
+			}
+		}
+	}
+
+	resp, err := utils.HandlePOSTHttpRequest(ctx, t.logger, constants.CreatePayinAPIURL, payload, constants.PostHTTPMethod)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "Failed to create payin", "error", err)
 		return nil, err

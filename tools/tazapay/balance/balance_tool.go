@@ -1,10 +1,11 @@
-package tazapay
+package balance
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 
@@ -48,6 +49,18 @@ func (t *BalanceTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp
 	if !ok {
 		return nil, errors.New("currency parameter missing or not a string")
 	}
+
+	// If empty string, fetch all balances
+	if len(currency) == 0 {
+		currency = ""
+	} else if len(currency) == 3 {
+		// Convert to uppercase if needed
+		currency = strings.ToUpper(currency)
+	} else {
+		return nil, errors.New("currency must be 3 letters (e.g., USD, INR) or empty to fetch all balances")
+	}
+
+	t.logger.Info("handling balance tool request", slog.Any("args", args))
 
 	resp, err := utils.HandleGETHttpRequest(ctx, t.logger, constants.BalanceBaseURLProd, constants.GetHTTPMethod)
 	if err != nil {

@@ -16,7 +16,7 @@ import (
 	tools "github.com/tazapay/tazapay-mcp-server/tools/register"
 )
 
-func initConfig(logger *slog.Logger) error {
+func InitConfig(logger *slog.Logger) error {
 	viper.AutomaticEnv()
 
 	home, err := os.UserHomeDir()
@@ -67,7 +67,7 @@ func main() {
 	}
 
 	// Initialize config to obtain the env variables
-	if err := initConfig(logger); err != nil {
+	if err := InitConfig(logger); err != nil {
 		logger.ErrorContext(context.Background(), "failed to initialize config", "error", err)
 		os.Exit(1)
 	}
@@ -80,15 +80,22 @@ func main() {
 
 	logger.InfoContext(context.Background(), "Started Tazapay MCP Server.")
 
-	// server := server.New(s)
-
-	// Gracefully shutdown at completion of execution
-	// defer server.Shutdown(context.Background())
-
-	// Run the server
-	serveErr := server.ServeStdio(s)
-	if serveErr != nil {
-		logger.ErrorContext(context.Background(), "server exited with error", "error", serveErr)
+	// for stdio
+	if err := server.ServeStdio(s); err != nil {
+		logger.ErrorContext(context.Background(), "server exited with error", "error", err)
 		os.Exit(1)
 	}
+	// streamable http server option
+	// streamServer := server.NewStreamableHTTPServer(s, server.WithEndpointPath("/stream"))
+	// defer streamServer.Shutdown(context.Background())
+	// addr := viper.GetString("STREAM_SERVER_ADDR")
+	//
+	//	if addr == "" {
+	//		addr = ":8081"
+	//	}
+	//
+	//	if err := streamServer.Start(addr); err != nil {
+	//		logger.ErrorContext(context.Background(), "server exited with error", "error", err)
+	//		os.Exit(1)
+	//	}
 }

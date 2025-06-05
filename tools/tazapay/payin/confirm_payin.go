@@ -1,4 +1,4 @@
-package tazapay
+package payin
 
 import (
 	"context"
