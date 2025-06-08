@@ -138,7 +138,7 @@ func (t *CreatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 
 	// Required fields
 	if v, ok := args["amount"]; ok {
-		payload["amount"] = v
+		payload["amount"] = v.(int64) * 100
 	}
 
 	if v, ok := args["invoice_currency"]; ok {

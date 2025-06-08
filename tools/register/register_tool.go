@@ -35,7 +35,7 @@ func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
 		payin.NewCreatePayinTool(logger),
 		payin.NewUpdatePayinTool(logger),
 		payin.NewCancelPayinTool(logger),
-		payin.NewConfirmPayinTool(logger),
+		//payin.NewConfirmPayinTool(logger),
 		checkout.NewPaymentLinkTool(logger),
 		checkout.NewFetchCheckoutTool(logger),
 		checkout.NewExpireCheckoutTool(logger),

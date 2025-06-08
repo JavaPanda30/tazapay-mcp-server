@@ -18,7 +18,7 @@ type PayoutRequest struct {
 	Metadata                 string                    `json:"metadata,omitempty"`
 	Currency                 string                    `json:"currency"`
 	BeneficiaryDetails       Beneficiary               `json:"beneficiary_details"`
-	Amount                   int32                     `json:"amount"`
+	Amount                   int64                     `json:"amount"`
 }
 
 // LogisticsTrackingDetails represents logistics tracking info for a payout
