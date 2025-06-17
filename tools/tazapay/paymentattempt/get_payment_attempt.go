@@ -2,6 +2,7 @@ package paymentattempt
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // GetPaymentAttemptTool fetches a payment attempt by ID
@@ -63,9 +65,22 @@ func (t *GetPaymentAttemptTool) Handle(ctx context.Context, req mcp.CallToolRequ
 		return nil, constants.ErrNoDataInResponse
 	}
 
+	// Convert amount from cents to decimal value if present
+	if amount, exists := data["amount"].(float64); exists {
+		data["amount"] = money.Int64ToDecimal2(int64(amount))
+		data["amount_original"] = amount
+	}
+
+	// Format the data as pretty JSON
+	jsonBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.logger.ErrorContext(ctx, "Failed to marshal payment attempt data", "error", err)
+		return nil, err
+	}
+
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{
-			mcp.TextContent{Type: "text", Text: fmt.Sprintf("Payment attempt data: %+v", data)},
+			mcp.TextContent{Type: "text", Text: string(jsonBytes)},
 		},
 	}
 	t.logger.InfoContext(ctx, "Successfully handled GetPaymentAttemptTool request", "result", result)

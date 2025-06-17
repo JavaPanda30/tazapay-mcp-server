@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tazapay/tazapay-mcp-server/constants"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -29,28 +29,23 @@ func GetBalances(data map[string]any, currency string) (string, error) {
 	if len(result.Data.Available) == 0 {
 		return "No balances found.", nil
 	}
-
 	// Normalize currency if provided
 	if currency != "" {
 		currencyCode := strings.ToUpper(currency)
 		for _, balance := range result.Data.Available {
 			if strings.EqualFold(balance.Currency, currencyCode) {
-				amountInt := balance.Amount
-				amountFloat := float64(amountInt) / constants.Num100
-
+				amountFloat := money.Int64ToDecimal2(balance.Amount)
 				return fmt.Sprintf("%s balance: %.2f", balance.Currency, amountFloat), nil
 			}
 		}
 
 		return "No balance found for currency: " + currencyCode, nil
 	}
-
 	// Format all balances
 	output := "Available account balances:\n"
 
 	for _, balance := range result.Data.Available {
-		amountInt := balance.Amount
-		amountFloat := float64(amountInt) / constants.Num100
+		amountFloat := money.Int64ToDecimal2(balance.Amount)
 		output += fmt.Sprintf("- %s: %.2f\n", balance.Currency, amountFloat)
 	}
 

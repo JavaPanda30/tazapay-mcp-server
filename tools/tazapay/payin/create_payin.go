@@ -9,6 +9,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // CreatePayinTool represents the create payin tool
@@ -138,7 +139,7 @@ func (t *CreatePayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (
 
 	// Required fields
 	if v, ok := args["amount"]; ok {
-		payload["amount"] = v.(int64) * 100
+		payload["amount"] = money.Decimal2ToInt64(v.(float64))
 	}
 
 	if v, ok := args["invoice_currency"]; ok {

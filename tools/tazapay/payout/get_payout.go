@@ -10,6 +10,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // GetPayoutTool fetches a payout by ID
@@ -63,6 +64,26 @@ func (t *GetPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*m
 	if !ok {
 		t.logger.ErrorContext(ctx, "No data in get payout API response", "resp", resp)
 		return nil, constants.ErrNoDataInResponse
+	}
+
+	// Convert amount from cents to decimal value if present
+	if amount, exists := data["amount"].(float64); exists {
+		data["amount"] = money.Int64ToDecimal2(int64(amount))
+		data["amount_original"] = amount
+	}
+
+	// Check for amount in sub-objects as well, such as transactions
+	if transactions, ok := data["transactions"].([]any); ok {
+		for i, trans := range transactions {
+			if transMap, ok := trans.(map[string]any); ok {
+				if amount, exists := transMap["amount"].(float64); exists {
+					transMap["amount"] = money.Int64ToDecimal2(int64(amount))
+					transMap["amount_original"] = amount
+					transactions[i] = transMap
+				}
+			}
+		}
+		data["transactions"] = transactions
 	}
 
 	jsonBytes, err := json.MarshalIndent(data, "", "  ")

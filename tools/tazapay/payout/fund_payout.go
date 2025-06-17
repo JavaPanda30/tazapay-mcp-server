@@ -9,6 +9,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // FundPayoutTool funds a payout in requires_funding state
@@ -70,7 +71,20 @@ func (t *FundPayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*
 		t.logger.ErrorContext(ctx, "No status in fund payout data", "data", data)
 		return nil, constants.ErrNoStatusInFundPayoutData
 	}
+
 	resultText := "Payout funded. Status: " + status
+
+	// Convert amount from cents to decimal value if present
+	if amount, exists := data["amount"].(float64); exists {
+		currency, hasCurrency := data["currency"].(string)
+		amountValue := money.Int64ToDecimal2(int64(amount))
+
+		if hasCurrency {
+			resultText += fmt.Sprintf("\nAmount: %s %.2f", currency, amountValue)
+		} else {
+			resultText += fmt.Sprintf("\nAmount: %.2f", amountValue)
+		}
+	}
 
 	result := &mcp.CallToolResult{
 		Content: []mcp.Content{

@@ -11,6 +11,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // GetPayinTool fetches a payin by ID
@@ -62,6 +63,12 @@ func (t *GetPayinTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mc
 	if !ok {
 		t.logger.ErrorContext(ctx, "No data in get payin API response", "resp", resp)
 		return nil, constants.ErrNoDataInResponse
+	}
+
+	// Convert amount from cents to decimal value if present
+	if amount, exists := data["amount"].(float64); exists {
+		data["amount"] = money.Int64ToDecimal2(int64(amount))
+		data["amount_original"] = amount
 	}
 
 	// Marshal the data to pretty JSON

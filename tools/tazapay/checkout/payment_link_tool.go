@@ -10,6 +10,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -157,7 +158,7 @@ func validateAndExtractArgs(ctx context.Context, t *PaymentLinkTool, args map[st
 // NewPaymentLinkRequest constructs the API payload from the validated parameters
 func NewPaymentLinkRequest(p *types.PaymentLinkParams) types.PaymentLinkRequest {
 	return types.PaymentLinkRequest{
-		Amount:                 int64(p.PaymentAmount * constants.Num100),
+		Amount:                 money.Decimal2ToInt64(p.PaymentAmount),
 		InvoiceCurrency:        p.InvoiceCurrency,
 		TransactionDescription: p.Description,
 		CustomerDetails: map[string]string{

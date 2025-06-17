@@ -9,6 +9,8 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	fmath "github.com/tazapay/tazapay-mcp-server/pkg/utils/math"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -51,8 +53,9 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 	}
 
 	// construct URL for API call
+	amountInt := int(fmath.Round2Decimal(params.Amount * 100))
 	url := fmt.Sprintf("%s?initial_currency=%s&final_currency=%s&amount=%d",
-		constants.PaymentFxBaseURLProd, params.From, params.To, int(params.Amount))
+		constants.PaymentFxBaseURLProd, params.From, params.To, amountInt)
 
 	t.logger.InfoContext(ctx, "Calling FX API", slog.String("url", url))
 
@@ -82,7 +85,27 @@ func (t *FXTool) Handle(ctx context.Context, req mcp.CallToolRequest) (*mcp.Call
 		return nil, utils.WrapFieldTypeError(ctx, t.logger, "converted_amount")
 	}
 
-	result := fmt.Sprintf("Rate: %.2f, Converted Amount: %.2f", exRate, converted)
+	// Use rounding function for consistent display
+	formattedExRate := fmath.Round2Decimal(exRate)
+	
+	// If converted amount is in cents, convert to decimal
+	formattedConvertedAmount := 0.0
+	// If the amount looks like cents (large number), convert it to decimal
+	if converted > 100 && params.Amount < 100 {
+		formattedConvertedAmount = money.Int64ToDecimal2(int64(converted))
+	} else {
+		formattedConvertedAmount = fmath.Round2Decimal(converted)
+	}
+	
+	// Format with currency symbols if available
+	fromCurrency := params.From
+	toCurrency := params.To
+	
+	result := fmt.Sprintf(
+		"Exchange Rate: 1 %s = %.2f %s\nConverted Amount: %.2f %s = %.2f %s",
+		fromCurrency, formattedExRate, toCurrency,
+		params.Amount, fromCurrency, formattedConvertedAmount, toCurrency,
+	)
 	t.logger.InfoContext(ctx, "FXTool result ready", slog.String("result", result))
 
 	// return result

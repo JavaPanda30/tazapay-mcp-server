@@ -9,6 +9,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 	"github.com/tazapay/tazapay-mcp-server/types"
 )
 
@@ -307,6 +308,11 @@ func (t *CreatePayoutTool) Handle(ctx context.Context, req mcp.CallToolRequest) 
 	if err := t.validatePayoutArgs(ctx, args); err != nil {
 		t.logger.ErrorContext(ctx, "Validation failed", constants.KeyError, err)
 		return nil, err
+	}
+
+	// Convert amount from float64 to int64 cents before mapping to struct
+	if amount, ok := args["amount"].(float64); ok {
+		args["amount"] = money.Decimal2ToInt64(amount)
 	}
 
 	var payload types.PayoutRequest

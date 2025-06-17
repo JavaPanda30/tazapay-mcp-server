@@ -11,6 +11,7 @@ import (
 
 	"github.com/tazapay/tazapay-mcp-server/constants"
 	"github.com/tazapay/tazapay-mcp-server/pkg/utils"
+	"github.com/tazapay/tazapay-mcp-server/pkg/utils/money"
 )
 
 // FetchCheckoutTool fetches the details of a checkout session by ID
@@ -62,6 +63,12 @@ func (t *FetchCheckoutTool) Handle(ctx context.Context, req mcp.CallToolRequest)
 	if !ok {
 		t.logger.ErrorContext(ctx, "No data in fetch checkout API response", "resp", resp)
 		return nil, constants.ErrNoDataInResponse
+	}
+
+	// Convert amount from cents to decimal value if present
+	if amount, exists := data["amount"].(float64); exists {
+		data["amount"] = money.Int64ToDecimal2(int64(amount))
+		data["amount_original"] = amount
 	}
 
 	fullDataJSON, err := json.MarshalIndent(data, "", "  ")
