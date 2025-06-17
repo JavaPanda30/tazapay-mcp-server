@@ -23,8 +23,6 @@ import (
 // They should NOT perform any blocking or heavy operations (network calls, file I/O, etc.).
 // Only assign struct fields and log. Any heavy setup should be deferred to the handler or background goroutines.
 func RegisterTools(s *server.MCPServer, logger *slog.Logger) {
-	logger.InfoContext(context.Background(), "Registering tools with MCP server")
-
 	tools := []types.Tool{
 		balance.NewFXTool(logger),
 		balance.NewBalanceTool(logger),

@@ -20,7 +20,7 @@ type CreatePayoutTool struct {
 
 // NewCreatePayoutTool returns a new instance of the CreatePayoutTool
 func NewCreatePayoutTool(logger *slog.Logger) *CreatePayoutTool {
-	logger.InfoContext(context.Background(), "Initializing Create_Payout_Tool")
+	logger.InfoContext(context.Background(), "Registering Create_Payout_Tool")
 	return &CreatePayoutTool{logger: logger}
 }
 

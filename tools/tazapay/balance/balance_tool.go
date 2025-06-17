@@ -20,7 +20,7 @@ type BalanceTool struct {
 
 // NewBalanceTool creates a new balance tool
 func NewBalanceTool(logger *slog.Logger) *BalanceTool {
-	logger.InfoContext(context.Background(), "Initializing BalanceTool")
+	logger.InfoContext(context.Background(), "Registering Balance_Tool")
 
 	return &BalanceTool{
 		logger: logger,
@@ -29,7 +29,6 @@ func NewBalanceTool(logger *slog.Logger) *BalanceTool {
 
 // Definition returns the tool definition
 func (t *BalanceTool) Definition() mcp.Tool {
-	t.logger.InfoContext(context.Background(), "Defining BalanceTool")
 
 	return mcp.NewTool(
 		constants.BalanceToolName,

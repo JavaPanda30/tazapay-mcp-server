@@ -35,11 +35,15 @@ const (
 	KeyBank               = "bank"
 	KeyWallet             = "wallet"
 
-	// Add string constants for repeated schema keys
+	// string constants for repeated schema keys
 	KeyObject      = "object"
 	KeyProperties  = "properties"
 	KeyType        = "type"
 	KeyString      = "string"
 	KeyBoolean     = "boolean"
 	KeyDescription = "description"
+
+	// string constants for transport types
+	TransportTypeStdio          = "stdio"
+	TransportTypeStreamableHTTP = "streamablehttp"
 )

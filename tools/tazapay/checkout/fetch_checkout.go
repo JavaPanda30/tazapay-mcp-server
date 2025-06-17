@@ -21,7 +21,7 @@ type FetchCheckoutTool struct {
 }
 
 func NewFetchCheckoutTool(logger *slog.Logger) *FetchCheckoutTool {
-	logger.Info("Initializing FetchCheckoutTool")
+	logger.Info("Registering Fetch_Checkout_Tool")
 	return &FetchCheckoutTool{logger: logger}
 }
 

@@ -21,7 +21,7 @@ type PaymentLinkTool struct {
 
 // NewPaymentLinkTool returns a new instance of the PaymentLinkTool
 func NewPaymentLinkTool(logger *slog.Logger) *PaymentLinkTool {
-	logger.InfoContext(context.Background(), "Initializing PaymentLinkTool")
+	logger.InfoContext(context.Background(), "Registering Payment_Link_Tool")
 
 	return &PaymentLinkTool{
 		logger: logger,

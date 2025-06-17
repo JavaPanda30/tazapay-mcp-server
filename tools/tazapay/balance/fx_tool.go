@@ -21,7 +21,7 @@ type FXTool struct {
 
 // NewFXTool returns a new instance of the FXTool
 func NewFXTool(logger *slog.Logger) *FXTool {
-	logger.Info("Initializing FXTool")
+	logger.Info("Registering FX_Tool")
 
 	return &FXTool{
 		logger: logger,

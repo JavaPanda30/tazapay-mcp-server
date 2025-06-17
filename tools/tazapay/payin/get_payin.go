@@ -21,7 +21,7 @@ type GetPayinTool struct {
 }
 
 func NewGetPayinTool(logger *slog.Logger) *GetPayinTool {
-	logger.Info("Initializing GetPayinTool")
+	logger.Info("Registering Get_Payin_Tool")
 	return &GetPayinTool{logger: logger}
 }
 

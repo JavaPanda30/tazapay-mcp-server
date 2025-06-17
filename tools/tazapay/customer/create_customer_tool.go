@@ -19,7 +19,7 @@ type CreateCustomerTool struct {
 }
 
 func NewCreateCustomerTool(logger *slog.Logger) *CreateCustomerTool {
-	logger.Info("Initializing CreateCustomerTool")
+	logger.Info("Registering Create_Customer_Tool")
 	return &CreateCustomerTool{logger: logger}
 }
 

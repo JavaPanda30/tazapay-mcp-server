@@ -19,7 +19,7 @@ type ExpireCheckoutTool struct {
 }
 
 func NewExpireCheckoutTool(logger *slog.Logger) *ExpireCheckoutTool {
-	logger.Info("Initializing ExpireCheckoutTool")
+	logger.Info("Registering Expire_Checkout_Tool")
 	return &ExpireCheckoutTool{logger: logger}
 }
 

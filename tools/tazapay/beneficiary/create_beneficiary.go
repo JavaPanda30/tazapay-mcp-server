@@ -18,13 +18,12 @@ type CreateBeneficiaryTool struct {
 
 // NewCreateBeneficiaryTool returns a new instance of the CreateBeneficiaryTool
 func NewCreateBeneficiaryTool(logger *slog.Logger) *CreateBeneficiaryTool {
-	logger.Info("Initializing Create_Beneficiary_Tool")
+	logger.Info("Registering Create_Beneficiary_Tool")
 	return &CreateBeneficiaryTool{logger: logger}
 }
 
 // Definition : registers this tool with the MCP
 func (t *CreateBeneficiaryTool) Definition() mcp.Tool {
-	t.logger.Info("Registering CreateBeneficiaryTool with MCP")
 
 	return mcp.NewTool(
 		constants.CreateBeneficiaryToolName,

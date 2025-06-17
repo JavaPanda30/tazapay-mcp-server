@@ -20,6 +20,7 @@ type GetPayoutTool struct {
 }
 
 func NewGetPayoutTool(logger *slog.Logger) *GetPayoutTool {
+	logger.Info("Registering Get_Payout_Tool")
 	return &GetPayoutTool{logger: logger}
 }
 

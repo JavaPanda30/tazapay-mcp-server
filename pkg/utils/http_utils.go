@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/viper"
 
@@ -69,7 +70,6 @@ func HandlePOSTHttpRequest(ctx context.Context, logger *slog.Logger, url string,
 	if resp.StatusCode < constants.HTTPStatusOKMin || resp.StatusCode >= constants.HTTPStatusOKMax {
 		logger.ErrorContext(ctx, constants.StrNonSuccessHTTPResponse,
 			slog.Int(constants.StrStatusCode, resp.StatusCode),
-			slog.String(constants.StrBody, string(bodyBytes)),
 		)
 
 		return nil, fmt.Errorf(constants.StrWrappedErrorWithBody,
@@ -95,7 +95,8 @@ func HandleGETHttpRequest(ctx context.Context, logger *slog.Logger,
 		constants.HeaderAuthorization: constants.AuthSchemeBasic + viper.GetString(constants.StrTAZAPAYAuthToken),
 	}
 
-	logger.InfoContext(ctx, "Sending GET request")
+	logger.InfoContext(ctx, "Sending GET request", 
+	slog.Any("headers", headers))
 
 	req, err := http.NewRequestWithContext(ctx, method, url, http.NoBody)
 	if err != nil {
@@ -125,7 +126,6 @@ func HandleGETHttpRequest(ctx context.Context, logger *slog.Logger,
 	if resp.StatusCode < constants.HTTPStatusOKMin || resp.StatusCode >= constants.HTTPStatusOKMax {
 		logger.ErrorContext(ctx, constants.StrNonSuccessHTTPResponse,
 			slog.Int(constants.StrStatusCode, resp.StatusCode),
-			slog.String(constants.StrBody, string(bodyBytes)),
 		)
 
 		return nil, fmt.Errorf(constants.StrWrappedErrorWithBody,
@@ -199,7 +199,6 @@ func HandlePUTHttpRequest(ctx context.Context, logger *slog.Logger,
 
 		logger.ErrorContext(ctx, constants.StrNonSuccessHTTPResponse,
 			slog.Int(constants.StrStatusCode, resp.StatusCode),
-			slog.String(constants.StrBody, string(bodyBytes)),
 		)
 
 		return nil, fmt.Errorf(constants.StrWrappedErrorWithBody, constants.ErrNonSuccessStatus,
@@ -257,7 +256,6 @@ func HandleDELETEHttpRequest(ctx context.Context, logger *slog.Logger,
 	if resp.StatusCode < constants.HTTPStatusOKMin || resp.StatusCode >= constants.HTTPStatusOKMax {
 		logger.ErrorContext(ctx, constants.StrNonSuccessHTTPResponse,
 			slog.Int(constants.StrStatusCode, resp.StatusCode),
-			slog.String(constants.StrBody, string(bodyBytes)),
 		)
 
 		return nil, fmt.Errorf(constants.StrWrappedErrorWithBody, constants.ErrNonSuccessStatus,
@@ -274,3 +272,18 @@ func HandleDELETEHttpRequest(ctx context.Context, logger *slog.Logger,
 
 	return result, nil
 }
+
+
+// AuthHeaderHTTPContextFunc is a function that adds the authorization header to the context from the incoming requests.
+func AuthHeaderHTTPContextFunc(ctx context.Context, r *http.Request) context.Context {
+    authHeader := r.Header.Get(constants.HeaderAuthorization)
+    var basicToken string
+    if after, ok :=strings.CutPrefix(authHeader, "Bearer Basic "); ok  {
+        basicToken = after
+    } else if after, ok :=strings.CutPrefix(authHeader, "Basic "); ok  {
+        basicToken = after
+    }
+    viper.Set(constants.StrTAZAPAYAuthToken, basicToken)
+    return r.Context()
+}
+

@@ -18,13 +18,12 @@ type UpdatePayinTool struct {
 }
 
 func NewUpdatePayinTool(logger *slog.Logger) *UpdatePayinTool {
-	logger.InfoContext(context.Background(), "Initializing UpdatePayinTool")
+	logger.InfoContext(context.Background(), "Registering Update_Payin_Tool")
 	return &UpdatePayinTool{logger: logger}
 }
 
 func (t *UpdatePayinTool) Definition() mcp.Tool {
-	t.logger.InfoContext(context.Background(), "Defining UpdatePayinTool")
-
+	
 	return mcp.NewTool(
 		"update_payin_tool",
 		mcp.WithDescription("Update a payin on Tazapay without confirming it"),

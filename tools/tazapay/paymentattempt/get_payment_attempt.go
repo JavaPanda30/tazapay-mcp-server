@@ -21,7 +21,7 @@ type GetPaymentAttemptTool struct {
 }
 
 func NewGetPaymentAttemptTool(logger *slog.Logger) *GetPaymentAttemptTool {
-	logger.Info("Initializing GetPaymentAttemptTool")
+	logger.Info("Registering Get_Payment_Attempt_Tool")
 	return &GetPaymentAttemptTool{logger: logger}
 }
 

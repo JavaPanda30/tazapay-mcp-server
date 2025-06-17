@@ -18,12 +18,11 @@ type UpdateBeneficiaryTool struct {
 }
 
 func NewUpdateBeneficiaryTool(logger *slog.Logger) *UpdateBeneficiaryTool {
-	logger.InfoContext(context.Background(), "Initializing UpdateBeneficiaryTool")
+	logger.InfoContext(context.Background(), "Registering Update_Beneficiary_Tool")
 	return &UpdateBeneficiaryTool{logger: logger}
 }
 
 func (t *UpdateBeneficiaryTool) Definition() mcp.Tool {
-	t.logger.InfoContext(context.Background(), "Defining UpdateBeneficiaryTool")
 
 	return mcp.NewTool(
 		"update_beneficiary_tool",

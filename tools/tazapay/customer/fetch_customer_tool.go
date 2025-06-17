@@ -21,7 +21,7 @@ type FetchCustomerTool struct {
 }
 
 func NewFetchCustomerTool(logger *slog.Logger) *FetchCustomerTool {
-	logger.Info("Initializing FetchCustomerTool")
+	logger.Info("Registering Fetch_Customer_Tool")
 	return &FetchCustomerTool{logger: logger}
 }
 

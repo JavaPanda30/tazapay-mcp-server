@@ -20,7 +20,7 @@ type CreatePayinTool struct {
 }
 
 func NewCreatePayinTool(logger *slog.Logger) *CreatePayinTool {
-	logger.Info("Initializing CreatePayinTool")
+	logger.Info("Registering Create_Payin_Tool")
 	return &CreatePayinTool{logger: logger}
 }
 

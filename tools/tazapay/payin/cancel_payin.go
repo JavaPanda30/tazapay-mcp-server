@@ -19,13 +19,12 @@ type CancelPayinTool struct {
 }
 
 func NewCancelPayinTool(logger *slog.Logger) *CancelPayinTool {
-	logger.InfoContext(context.Background(), "Initializing CancelPayinTool")
+	logger.InfoContext(context.Background(), "Registering Cancel_Payin_Tool")
 	return &CancelPayinTool{logger: logger}
 }
 
 func (t *CancelPayinTool) Definition() mcp.Tool {
-	t.logger.InfoContext(context.Background(), "Defining CancelPayinTool")
-
+	
 	return mcp.NewTool(
 		constants.CancelPayinToolName,
 		mcp.WithDescription(constants.CancelPayinToolDesc),

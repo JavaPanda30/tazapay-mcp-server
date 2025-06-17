@@ -19,7 +19,7 @@ type FundPayoutTool struct {
 }
 
 func NewFundPayoutTool(logger *slog.Logger) *FundPayoutTool {
-	logger.InfoContext(context.Background(), "Initializing FundPayoutTool")
+	logger.InfoContext(context.Background(), "Registering Fund_Payout_Tool")
 	return &FundPayoutTool{logger: logger}
 }
 

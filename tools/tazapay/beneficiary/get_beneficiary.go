@@ -21,7 +21,7 @@ type GetBeneficiaryTool struct {
 }
 
 func NewGetBeneficiaryTool(logger *slog.Logger) *GetBeneficiaryTool {
-	logger.Info("Initializing GetBeneficiaryTool")
+	logger.Info("Registering Get_Beneficiary_Tool")
 	return &GetBeneficiaryTool{logger: logger}
 }
 
